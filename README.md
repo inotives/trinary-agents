@@ -67,12 +67,19 @@ runtime assumptions at the skill that introduces them.
 | [Trinary Agents](skills/trinary-agents/SKILL.md) | Plan feature work, track dependencies, coordinate implementation and independent review, and preserve decisions in Markdown handoffs. |
 | [Trinary Workspace Backup](skills/trinary-workspace-backup/SKILL.md) | Back up, verify, and restore `trinary-workspace/` through a connected Google Drive integration. |
 
-To install Trinary Agents for Codex in your project, run this from the project
+To install Trinary Agents in your project, run one of these from the project
 root:
 
 ```sh
+# Codex
 npx skills add inotives/trinary-agents --skill trinary-agents --agent codex
+
+# Claude Code (installs to .claude/skills/trinary-agents/)
+npx skills add inotives/trinary-agents --skill trinary-agents --agent claude-code
 ```
+
+Claude Code runs the worker and reviewer as separate sub-agents through its
+`Agent` tool, which satisfies the independent review gate.
 
 ## How the Workflow Works
 
