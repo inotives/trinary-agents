@@ -65,6 +65,7 @@ runtime assumptions at the skill that introduces them.
 | Skill | What it does |
 | --- | --- |
 | [Trinary Agents](skills/trinary-agents/SKILL.md) | Plan feature work, track dependencies, coordinate implementation and independent review, and preserve decisions in Markdown handoffs. |
+| [Trinary Workspace Backup](skills/trinary-workspace-backup/SKILL.md) | Back up, verify, and restore `trinary-workspace/` through a connected Google Drive integration. |
 
 ## How the Workflow Works
 

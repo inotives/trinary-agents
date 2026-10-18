@@ -2,7 +2,7 @@
 id: T-0002
 feature: IP-0001
 title: Add cross-harness Google Drive backup skill
-status: ready
+status: done
 depends_on: []
 ---
 
