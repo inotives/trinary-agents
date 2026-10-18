@@ -164,6 +164,7 @@ The skill uses capability-based instructions that apply across Codex, Claude, Op
 - Requested dashboard generation as the default for features with one or more tasks, including single-task features.
 - Requested an accessible task details button on dashboard cards that opens task README details in the existing handoff sidebar; approved adding this as a new task on 2026-10-18.
 - Requested moving the task details button to the top-right of each task card to align with the handoff detail button on 2026-10-18.
+- Noted that `Owner: Completed` is misleading in task details because `Completed` is a terminal task state, not an owner; requested a correction on 2026-10-18.
 - Approved the feature plan on 2026-10-18.
 - Approved the two-task breakdown on 2026-10-18.
 
@@ -192,5 +193,6 @@ Tasks T-0001 and T-0002 were approved on 2026-10-18. The human approved adding T
 - Previous implementation acceptance: The user accepted T-0001 and T-0002 on 2026-10-18.
 - T-0003 dashboard verification: The feature generator completed with 3 tasks; `git diff --check` passed. The independent reviewer approved the implementation after the close-button label was made generic for task and handoff details.
 - T-0003 placement refinement: The task details button is aligned at the top-right of each card like the handoff button. The independent reviewer approved the placement and confirmed prior safety and drawer behavior remain intact.
+- T-0003 owner display correction: Completed task details omit the derived `Owner: Completed` row, while active tasks retain their owner row and dashboard card ownership remains unchanged. The independent reviewer approved this correction.
 - T-0003 limitation: No tests or browser interaction checks were run. The existing drawer's close, backdrop, Escape, and focus-return behavior was reused and reviewed by inspection.
 - Current decision: Awaiting human acceptance of T-0003 and the reopened feature.

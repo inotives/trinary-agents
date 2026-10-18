@@ -732,7 +732,9 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
       drawerClose.focus();
     }}
     function openTaskDetails(task) {{
-      openDetails(`${{task.id}} · Task details`, [["Task", task.title], ["Status", task.status.replaceAll("_", " ")], ["Owner", task.owner]], task.content);
+      const rows = [["Task", task.title], ["Status", task.status.replaceAll("_", " ")]];
+      if (task.owner !== "Completed") rows.push(["Owner", task.owner]);
+      openDetails(`${{task.id}} · Task details`, rows, task.content);
     }}
     function openHandoffDetails(handoff) {{
       openDetails(`${{handoff.task_id}} · Handoff details`, [["Task", `${{handoff.task_id}} · ${{handoff.task_title}}`], ["Role", handoff.role], ["Recipient", handoff.recipient || "—"], ["Outcome", handoff.outcome], ["Timestamp", handoff.timestamp]], handoff.content);
