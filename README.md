@@ -66,22 +66,37 @@ runtime assumptions at the skill that introduces them.
 | --- | --- |
 | [Trinary Agents](skills/trinary-agents/SKILL.md) | Plan feature work, track dependencies, coordinate implementation and independent review, and preserve decisions in Markdown handoffs. |
 
+## How the Workflow Works
+
+![Trinary Agents workflow from human-approved plan through project manager, worker, independent reviewer, Markdown task records, and the optional monitoring dashboard](assets/trinary-agents-workflow.svg)
+
+The task dashboard is an optional, read-only snapshot for monitoring task status,
+dependencies, progress, and handoff activity. Task READMEs remain the source of
+truth.
+
+## Trinary Agents UI Dashboard
+
+![Trinary Agents task dashboard showing completion, dependency map, task lanes, and handoff activity](assets/trinary-agents-dashboard-ui.png)
+
 ## Optional Supporting Skills and Tools
 
 The core workflow works with ordinary Markdown and the repository tools already
-available in the active harness. These optional capabilities can help with
-specific steps; use them when available rather than treating them as
-requirements:
+available in the active harness. Its feature-planning interview is built into
+the Trinary Agents skill; no separate grilling skill is required. These optional
+capabilities can help with other steps when available:
 
 | Workflow step | Optional capability | How it can help |
 | --- | --- | --- |
-| Clarify and record a plan | `grill-with-docs` | Interview for missing decisions and capture useful decision records. |
-| Interview without separate records | `grill-me` or another grilling skill | Ask focused questions until the feature plan is ready for review. |
-| Clarify domain language | `domain-modeling` or related domain skills | Agree on terms and boundaries before decomposing the work. |
 | Explore a larger codebase | `context-mode` | Search and summarize repository context without loading large files into the conversation. |
 | Navigate symbols and call paths | CodeGraph | Locate relevant code relationships when the repository has an index. |
-| Shape module boundaries | `codebase-design` | Review interfaces and identify focused implementation seams. |
 | Implement and review tasks independently | The active harness's agent delegation feature | Assign worker and reviewer roles to different agents. Independent delegation is needed to perform the independent review gate. |
+
+Sub-agents usually start with little or no repository context. Without
+`context-mode` and CodeGraph, they may scan broad parts of the codebase again for
+each assigned task, increasing setup time and token use. When available,
+`context-mode` can retrieve focused repository context and CodeGraph can surface
+relevant symbols and call paths, reducing repeated exploration and saving
+tokens. CodeGraph is most useful when the repository has an index.
 
 If an optional search or planning skill is unavailable, use the repository's
 normal search, file-reading, and interview workflow. If the harness cannot
