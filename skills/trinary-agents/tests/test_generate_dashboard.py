@@ -290,13 +290,16 @@ class DashboardGenerationTests(unittest.TestCase):
             self.assertNotIn('.text("Details")', page)
             self.assertIn('id="handoff-drawer-backdrop" class="handoff-drawer-backdrop" aria-hidden="true" inert', page)
             self.assertIn('role="dialog" aria-modal="true"', page)
-            self.assertIn('aria-label="Close handoff details"', page)
+            self.assertIn('aria-label="Close details"', page)
             self.assertIn('if (!drawer.contains(event.target)) closeHandoffDetails();', page)
             self.assertIn('drawerClose.addEventListener("click", closeHandoffDetails);', page)
             self.assertIn('document.querySelector(".dashboard").inert = true;', page)
             self.assertIn('drawerBackdrop.inert = true;', page)
-            self.assertIn('document.querySelector("#handoff-drawer-source").textContent = handoff.content;', page)
+            self.assertIn('document.querySelector("#handoff-drawer-source").textContent = content;', page)
+            self.assertIn('handoff.content);', page)
             self.assertNotIn('handoff.content).html(', page)
+            self.assertNotIn('#handoff-drawer-source").html(', page)
+            self.assertNotIn('innerHTML', page)
 
     def test_latest_handoff_uses_numeric_sequence_when_timestamps_match(self):
         with tempfile.TemporaryDirectory() as temp:
