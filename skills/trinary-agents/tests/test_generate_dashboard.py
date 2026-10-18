@@ -215,16 +215,19 @@ class DashboardGenerationTests(unittest.TestCase):
             self.assertIn('"depends_on":[]', updated)
             self.assertNotIn('"source":"T-0001"', updated)
 
-    def test_single_task_omits_generated_dashboard(self):
+    def test_single_task_generates_dashboard_and_empty_feature_omits_it(self):
         with tempfile.TemporaryDirectory() as temp:
             root = make_feature_root(temp)
             write_task(root, "T-0001", "Only", "ready", [])
-            write_task(root, "T-0002", "Temporary second task", "queued", ["T-0001"])
-            dashboard.generate(root)
-            self.assertTrue((root / "dashboard.html").exists())
-            (root / "tasks" / "T-0002--task-0002" / "README.md").unlink()
+
+            self.assertEqual(dashboard.generate(root), "generated with 1 tasks")
+            page = root / "dashboard.html"
+            self.assertTrue(page.exists())
+            self.assertIn("T-0001", page.read_text(encoding="utf-8"))
+
+            (root / "tasks" / "T-0001--task-0001" / "README.md").unlink()
             self.assertEqual(dashboard.generate(root), "omitted")
-            self.assertFalse((root / "dashboard.html").exists())
+            self.assertFalse(page.exists())
 
     def test_multi_task_refuses_to_overwrite_unmarked_dashboard(self):
         with tempfile.TemporaryDirectory() as temp:

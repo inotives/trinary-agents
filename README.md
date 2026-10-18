@@ -65,14 +65,22 @@ runtime assumptions at the skill that introduces them.
 | Skill | What it does |
 | --- | --- |
 | [Trinary Agents](skills/trinary-agents/SKILL.md) | Plan feature work, track dependencies, coordinate implementation and independent review, and preserve decisions in Markdown handoffs. |
+| [Trinary Workspace Backup](skills/trinary-workspace-backup/SKILL.md) | Back up, verify, and restore `trinary-workspace/` through a connected Google Drive integration. |
 
 ## How the Workflow Works
 
 ![Trinary Agents workflow from human-approved plan through project manager, worker, independent reviewer, Markdown task records, and the optional monitoring dashboard](assets/trinary-agents-workflow.svg)
 
-The task dashboard is an optional, read-only snapshot for monitoring task status,
-dependencies, progress, and handoff activity. Task READMEs remain the source of
-truth.
+For any feature with one or more valid task READMEs, the skill generates a
+read-only dashboard for monitoring task status, dependencies, progress, and
+handoff activity. Task READMEs remain the source of truth. Each task card has a
+top-right details button that opens the full task README in the same sidebar
+used for handoff details.
+Dashboard generation requires Python 3 and uses only the standard library; no
+Python packages need to be installed. On macOS, check with `python3 --version`.
+If the command is unavailable, install Python 3 using the macOS installer from
+[python.org](https://www.python.org/downloads/macos/), then open a new terminal
+and verify the command again.
 
 ## Trinary Agents UI Dashboard
 
