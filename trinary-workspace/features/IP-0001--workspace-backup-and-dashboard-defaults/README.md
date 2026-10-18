@@ -1,7 +1,7 @@
 ---
 id: IP-0001
 title: Google Drive Backup and Dashboard Defaults
-status: Awaiting Human Acceptance
+status: Accepted
 ---
 
 # Google Drive Backup and Dashboard Defaults
@@ -195,4 +195,5 @@ Tasks T-0001 and T-0002 were approved on 2026-10-18. The human approved adding T
 - T-0003 placement refinement: The task details button is aligned at the top-right of each card like the handoff button. The independent reviewer approved the placement and confirmed prior safety and drawer behavior remain intact.
 - T-0003 owner display correction: Completed task details omit the derived `Owner: Completed` row, while active tasks retain their owner row and dashboard card ownership remains unchanged. The independent reviewer approved this correction.
 - T-0003 limitation: No tests or browser interaction checks were run. The existing drawer's close, backdrop, Escape, and focus-return behavior was reused and reviewed by inspection.
-- Current decision: Awaiting human acceptance of T-0003 and the reopened feature.
+- Human decision: The user approved acceptance on 2026-10-18.
+- Current decision: Accepted.
