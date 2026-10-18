@@ -1,6 +1,11 @@
+---
+id: IP-0001
+title: Google Drive Backup and Dashboard Defaults
+status: Approved
+---
+
 # Google Drive Backup and Dashboard Defaults
 
-- Status: Approved
 - Project: Trinary Agents
 - Date: 2026-10-18
 
@@ -153,19 +158,20 @@ The skill uses capability-based instructions that apply across Codex, Claude, Op
 - Requested a connector readiness check before archive creation and actionable suggestions if connection or permissions are unavailable.
 - Requested dashboard generation as the default for features with one or more tasks, including single-task features.
 - Approved the feature plan on 2026-10-18.
+- Approved the two-task breakdown on 2026-10-18.
 
 ## Open questions
 
 None.
 
-## Proposed task breakdown (pending plan approval)
+## Approved task breakdown
 
 | ID | Task | Depends on | Scope |
 | --- | --- | --- | --- |
-| T-0001 | Generate dashboards for single-task features | None | Update the generator, focused test, and Trinary Agents workflow instructions; retain zero-task and unmarked-dashboard safety behavior. |
-| T-0002 | Add cross-harness Google Drive backup skill | None | Add the standalone backup/restore skill and repository README entry, with connector capability/authentication/access preflight and safe snapshot handling. |
+| [T-0001](tasks/T-0001--generate-single-task-dashboards/README.md) | Generate dashboards for single-task features | None | Update the generator, focused test, and Trinary Agents workflow instructions; retain zero-task and unmarked-dashboard safety behavior. |
+| [T-0002](tasks/T-0002--google-drive-backup-skill/README.md) | Add cross-harness Google Drive backup skill | None | Add the standalone backup/restore skill and repository README entry, with connector capability/authentication/access preflight and safe snapshot handling. |
 
-These tasks are ordered so the dashboard behavior is Task 1 as requested. They are independent and can be reviewed separately.
+These tasks are ordered so the dashboard behavior is Task 1 as requested. They are independent and can be reviewed separately. Task breakdown approved by the human on 2026-10-18.
 
 ## Final human acceptance
 
