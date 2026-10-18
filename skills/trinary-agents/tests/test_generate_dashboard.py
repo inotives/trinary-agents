@@ -203,7 +203,7 @@ class DashboardGenerationTests(unittest.TestCase):
             self.assertIn('"id":"T-0001"', page)
             self.assertIn('"status":"queued"', page)
             self.assertIn('"depends_on":["T-0001"]', page)
-            self.assertIn("d3@7/+esm", page)
+            self.assertIn("const d3 = window.d3;", page)
             self.assertNotIn('<meta http-equiv="refresh"', page)
 
             write_task(root, "T-0001", "Start", "done", [])
@@ -317,7 +317,9 @@ class DashboardGenerationTests(unittest.TestCase):
             self.assertIn('handoff.content);', page)
             self.assertNotIn('handoff.content).html(', page)
             self.assertNotIn('#handoff-drawer-source").html(', page)
-            self.assertNotIn('innerHTML', page)
+            app_script = re.search(r'<script>\n    const d3 = window\.d3;([\s\S]*?)\n  </script>', page)
+            self.assertIsNotNone(app_script)
+            self.assertNotIn('innerHTML', app_script.group(1))
 
     def test_latest_handoff_uses_numeric_sequence_when_timestamps_match(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -583,18 +585,35 @@ class DashboardGenerationTests(unittest.TestCase):
         page = dashboard.render_html([])
         self.assertIn('<html lang="en" data-theme="dark">', page)
         self.assertIn('aria-label="Toggle automatic dashboard refresh" aria-pressed="false"', page)
-        self.assertIn('class="refresh-icon" aria-hidden="true" alt="" width="20" height="20" src="https://cdn-icons-png.flaticon.com/512/3917/3917293.png"', page)
+        self.assertIn('<svg class="refresh-icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">', page)
         self.assertIn('.refresh-control[aria-pressed="true"] .refresh-icon', page)
         self.assertIn("animation: refresh-spin 1.5s linear infinite", page)
         self.assertIn("filter: brightness(0) invert(1)", page)
         self.assertIn("@media (prefers-reduced-motion: reduce)", page)
         self.assertIn('@media (prefers-reduced-motion: reduce) { .refresh-control[aria-pressed="true"] .refresh-icon { animation: none; } }', page)
-        self.assertIn('href="https://www.magnific.com">Magnific</a> from <a href="https://www.flaticon.com/">Flaticon</a>', page)
+        self.assertNotIn("flaticon", page.lower())
         self.assertIn('href="https://daisyui.com/">DaisyUI</a>', page)
         self.assertIn('href="https://d3js.org/">D3.js</a>', page)
-        self.assertNotIn("<svg class=\"refresh-icon\"", page)
         self.assertIn(".kanban-lane {", page)
         self.assertIn(".task-card {", page)
+
+    def test_dashboard_embeds_pinned_runtime_assets_without_external_requests(self):
+        page = dashboard.render_html([])
+        self.assertIn('/*! 🌼 daisyUI 5.7.50 - MIT License */', page)
+        self.assertIn('var pr="4.3.3"', page)
+        self.assertIn('// https://d3js.org v7.9.0', page)
+        self.assertIn("Tailwind CSS Browser 4.3.3 — MIT", page)
+        self.assertIn("DaisyUI 5.7.50 — MIT", page)
+        self.assertIn("D3 7.9.0 — ISC", page)
+        self.assertIn("D3 Ease 3.0.1 — BSD-3-Clause", page)
+        self.assertIn("robust-predicates 3.0.3 — Unlicense", page)
+        self.assertIn("Copyright 2010-2023 Mike Bostock", page)
+        self.assertNotRegex(page, r"(?i)<script\b[^>]*\bsrc\s*=\s*['\"]https?://")
+        self.assertNotRegex(page, r"(?i)<link\b[^>]*\bhref\s*=\s*['\"]https?://")
+        self.assertNotRegex(page, r"(?i)<img\b[^>]*\bsrc\s*=\s*['\"]https?://")
+        self.assertNotRegex(page, r"(?i)@import\s+(?:url\()?['\"]?https?://")
+        self.assertNotRegex(page, r"(?i)url\(\s*['\"]?\s*https?://")
+        self.assertNotIn("cdn.jsdelivr.net", page)
 
     def test_dashboard_fills_viewport_and_kanban_scrolls_responsively(self):
         page = dashboard.render_html([])
