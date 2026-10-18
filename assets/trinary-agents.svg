@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 200" role="img" aria-labelledby="title desc">
+  <title id="title">Trinary Agents</title>
+  <desc id="desc">Three connected nodes arranged as a team around a shared workflow.</desc>
+  <defs>
+    <linearGradient id="flow" x1="55" y1="45" x2="190" y2="155" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B7CFF"/>
+      <stop offset="1" stop-color="#39D6B0"/>
+    </linearGradient>
+  </defs>
+  <path d="M120 43 55 151h130L120 43Z" fill="none" stroke="url(#flow)" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"/>
+  <path d="M78 115c9-17 23-27 42-31M161 115c-9-17-23-27-41-31M80 151h80" fill="none" stroke="#AAB4D0" stroke-linecap="round" stroke-width="5"/>
+  <circle cx="120" cy="42" r="21" fill="#171B2B" stroke="#A99BFF" stroke-width="8"/>
+  <circle cx="54" cy="154" r="21" fill="#171B2B" stroke="#48D8B5" stroke-width="8"/>
+  <circle cx="186" cy="154" r="21" fill="#171B2B" stroke="#FFBF69" stroke-width="8"/>
+  <circle cx="120" cy="42" r="5" fill="#A99BFF"/>
+  <circle cx="54" cy="154" r="5" fill="#48D8B5"/>
+  <circle cx="186" cy="154" r="5" fill="#FFBF69"/>
+</svg>
