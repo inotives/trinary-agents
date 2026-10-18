@@ -236,7 +236,7 @@ def load_tasks(feature_dir):
         task["owner"] = current_owner(task["status"], task["latest_handoff"])
         task["lane"] = kanban_lane(task["status"])
         tasks.append(task)
-    if len(tasks) < 2:
+    if not tasks:
         return []
     by_id = {task["id"]: task for task in tasks}
     if len(by_id) != len(tasks):
