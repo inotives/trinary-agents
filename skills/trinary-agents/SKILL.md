@@ -58,7 +58,7 @@ The feature folder's `README.md` is the implementation plan; do not create a sec
 - A task breakdown section that will link to each task README and list dependencies.
 - A final human acceptance section for evidence and the human's explicit decision.
 
-Set plan status to `Draft` while interviewing and drafting. Present the IP, including the discussion captured in its README and any proposed task/dependency breakdown, for human review. Do not create task folders or dispatch implementation work until the human explicitly approves the plan and breakdown. Record the approval and set status to `Approved`. If an approved plan changes materially, explain the change and get approval again before affected work continues.
+Set plan status to `Draft` while interviewing and drafting. Present the IP, including the discussion captured in its README, for human review. Do not create task folders or dispatch implementation work until the human explicitly approves the plan. Record the approval and set status to `Approved`, then commit the approved feature plan on the feature branch before creating task folders. Commit only this feature plan; do not include unrelated work. If the plan cannot be cleanly isolated into a commit, pause and ask the human how to proceed. If an approved plan changes materially, explain the change and get approval again before affected work continues, then commit the approved plan change before continuing.
 
 ### 3. Decompose the approved plan into tasks
 
@@ -123,9 +123,11 @@ The `depends_on` frontmatter is the machine-readable source for dependency check
 
 Represent dependencies as a directed acyclic graph within this feature. Validate that every dependency names an existing task, no task depends on itself, and there are no cycles. Show the task list and dependency order to the human. A dependency change after work starts pauses dispatch until the revised plan is approved.
 
-After the plan and task breakdown are approved, set tasks with no dependencies to `ready`. A task becomes `ready` only when the plan is approved and every dependency is `done`.
+A task becomes `ready` only when the plan and task breakdown are approved and every dependency is `done`.
 
 Before setting the first task to `ready`, show the human the numbered task breakdown and dependency order and get approval. Record the approval in the feature README. If the human requests a change, revise the plan/task graph and revalidate dependencies before dispatch.
+
+After the human approves the task breakdown, set tasks with no dependencies to `ready` and regenerate the dashboard if applicable. Before dispatching the first task, create a Git commit on the feature branch containing the approved feature plan, task breakdown, initial task statuses, and generated dashboard when applicable. Do not include unrelated work. Record this baseline commit SHA in the first task's project-manager dispatch handoff. If these workflow records cannot be cleanly isolated into a commit, pause and ask the human how to proceed.
 
 ### 4. Dispatch one ready task to a worker
 
@@ -160,7 +162,7 @@ It includes evidence for the verdict and concrete findings or follow-up actions.
 
 Read the reviewer handoff and act on its verdict:
 
-- For `APPROVED`, set the task to `done`. Re-evaluate its dependents and set newly unblocked tasks to `ready`.
+- For `APPROVED`, set the task to `done`, re-evaluate its dependents, and set newly unblocked tasks to `ready`. Regenerate the feature dashboard if applicable. Before continuing the feature workflow, whether dispatching another task or beginning feature acceptance, commit the reviewed implementation changes and their task workflow updates, including resulting task statuses and the regenerated dashboard, on the feature branch. Commit only changes belonging to this task and its dependency updates; do not include unrelated work. If the task was implemented in a separate worktree or branch, integrate the approved changes into the feature branch and confirm the commit is present there. If the task changes cannot be cleanly isolated into a commit, pause and ask the human how to proceed.
 - For `CHANGES_REQUESTED`, set the task to `changes_requested`, give the worker the findings, then set it to `in_progress` while the worker performs rework. Repeat the worker/reviewer cycle. Allow up to three rework rounds for the task. If the third rework round is still not approved, stop and ask the human how to proceed.
 - When progress requires human intervention to resolve an external impediment, set the task to `blocked` and pause the entire feature workflow. Do not dispatch or continue other tasks while any task is blocked. Write a project-manager handoff that states the blocker, impact, the specific human decision or action needed, and any reasonable options. Route it to the human; do not guess at requirements or silently bypass the blocker. Wait for the human to resolve the question or unblock the task. After each human response, write a new human-response handoff in the same task folder, link it to the project-manager request handoff, and distinguish what the human reported from what the project-manager independently verified. If the response does not resolve the blocker, keep the task `blocked`, record any remaining question in a new project-manager handoff, and wait again. Only after resolution, set the task to the appropriate status (`ready`, `in_progress`, or `queued`), re-evaluate the dependency graph, and resume the loop. Unmet dependencies alone are not a blocker; keep those tasks `queued`.
 
@@ -182,7 +184,7 @@ Never dispatch a task while any task is `blocked`, even if another independent t
 
 When every task is `done`, set the feature plan status to `Awaiting Human Acceptance`. Run the feature-level acceptance checks from the feature README and record the actual commands, results, and evidence. Present the evidence and any remaining limitations to the human.
 
-Only after the human explicitly accepts the result, record that decision and set the plan status to `Accepted`. If the human requests changes, update the plan/task records and resume through the same dependency and review gates. Do not merge or push unless separately requested.
+Only after the human explicitly accepts the result, record that decision and set the plan status to `Accepted`, then commit the final acceptance record on the feature branch. Commit only the acceptance record; do not include unrelated work. If the acceptance record cannot be cleanly isolated into a commit, pause and ask the human how to proceed. If the human requests changes, update the plan/task records and resume through the same dependency and review gates. Do not merge or push unless separately requested.
 
 ## Status reference
 
