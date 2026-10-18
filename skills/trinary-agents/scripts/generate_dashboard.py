@@ -231,6 +231,7 @@ def load_tasks(feature_dir):
         if not (path / "README.md").is_file():
             continue
         task = read_task(path / "README.md")
+        task["content"] = (path / "README.md").read_text(encoding="utf-8")
         task["handoffs"] = read_handoffs(path / "handoffs", task)
         task["latest_handoff"] = latest_handoff(task["handoffs"])
         task["owner"] = current_owner(task["status"], task["latest_handoff"])
@@ -462,7 +463,8 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     .handoff-summary {{ margin: 0; color: #dbe7f5; font-size: .7rem; line-height: 1.4; overflow-wrap: anywhere; }}
     .handoff-entry-actions {{ display: flex; justify-content: flex-end; }}
     .handoff-detail-button {{ flex: 0 0 auto; width: 1.7rem; min-height: 1.7rem; height: 1.7rem; color: #a5f3fc; }}
-    .handoff-detail-button:hover {{ border-color: rgba(103, 232, 249, .45); background: rgba(8, 145, 178, .16); }}
+    .task-detail-button {{ justify-self: end; color: #a5f3fc; }}
+    .handoff-detail-button:hover, .task-detail-button:hover {{ border-color: rgba(103, 232, 249, .45); background: rgba(8, 145, 178, .16); }}
     .handoff-detail-icon {{ display: block; width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }}
     .handoff-drawer-backdrop {{ position: fixed; z-index: 20; inset: 0; background: rgba(2, 6, 15, .68); opacity: 0; pointer-events: none; transition: opacity .22s ease; }}
     .handoff-drawer-backdrop.is-open {{ opacity: 1; pointer-events: auto; }}
@@ -542,7 +544,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
   </main>
   <div id="handoff-drawer-backdrop" class="handoff-drawer-backdrop" aria-hidden="true" inert>
     <aside id="handoff-drawer" class="handoff-drawer" role="dialog" aria-modal="true" aria-labelledby="handoff-drawer-heading" aria-hidden="true">
-      <header class="handoff-drawer-header"><h2 id="handoff-drawer-heading">Handoff details</h2><button id="handoff-drawer-close" class="btn btn-circle btn-ghost btn-sm" type="button" aria-label="Close handoff details">×</button></header>
+      <header class="handoff-drawer-header"><h2 id="handoff-drawer-heading">Handoff details</h2><button id="handoff-drawer-close" class="btn btn-circle btn-ghost btn-sm" type="button" aria-label="Close details">×</button></header>
       <div id="handoff-drawer-meta" class="handoff-drawer-meta"></div>
       <pre id="handoff-drawer-source" class="handoff-drawer-source"></pre>
     </aside>
@@ -665,6 +667,15 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
         field("Depends", task.depends_on.length ? task.depends_on.join(", ") : "None");
         field("Latest handoff", `${{task.latest_handoff.role}} · ${{task.latest_handoff.outcome}} · ${{task.latest_handoff.timestamp}}`);
         if (task.latest_handoff.summary) card.append("p").attr("class", "task-card-summary").text(task.latest_handoff.summary);
+        const detailButton = card.append("button").attr("class", "btn btn-circle btn-ghost btn-xs handoff-detail-button task-detail-button")
+          .attr("type", "button")
+          .attr("aria-label", `Show full details for ${{task.id}} task`)
+          .attr("title", `Show full details for ${{task.id}} task`)
+          .on("click", () => openTaskDetails(task));
+        const detailIcon = detailButton.append("svg").attr("class", "handoff-detail-icon")
+          .attr("viewBox", "0 0 24 24").attr("aria-hidden", "true");
+        detailIcon.append("circle").attr("cx", 12).attr("cy", 12).attr("r", 9);
+        detailIcon.append("path").attr("d", "M12 11v5m0-8h.01");
       }});
     }});
     d3.select("#handoff-total").text(`${{handoffs.length}} handoffs`);
@@ -690,7 +701,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     const drawerBackdrop = document.querySelector("#handoff-drawer-backdrop");
     const drawer = document.querySelector("#handoff-drawer");
     const drawerClose = document.querySelector("#handoff-drawer-close");
-    let handoffDetailsTrigger = null;
+    let detailsTrigger = null;
     function closeHandoffDetails() {{
       if (!drawerBackdrop.classList.contains("is-open")) return;
       drawerBackdrop.classList.remove("is-open");
@@ -698,25 +709,31 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
       drawerBackdrop.inert = true;
       drawer.setAttribute("aria-hidden", "true");
       document.querySelector(".dashboard").inert = false;
-      handoffDetailsTrigger?.focus();
+      detailsTrigger?.focus();
     }}
-    function openHandoffDetails(handoff) {{
-      handoffDetailsTrigger = document.activeElement;
-      document.querySelector("#handoff-drawer-heading").textContent = `${{handoff.task_id}} · Handoff details`;
+    function openDetails(heading, rows, content) {{
+      detailsTrigger = document.activeElement;
+      document.querySelector("#handoff-drawer-heading").textContent = heading;
       const metadata = document.querySelector("#handoff-drawer-meta");
       metadata.replaceChildren();
-      for (const [label, value] of [["Task", `${{handoff.task_id}} · ${{handoff.task_title}}`], ["Role", handoff.role], ["Recipient", handoff.recipient || "—"], ["Outcome", handoff.outcome], ["Timestamp", handoff.timestamp]]) {{
+      for (const [label, value] of rows) {{
         const row = document.createElement("div");
         row.textContent = `${{label}}: ${{value}}`;
         metadata.append(row);
       }}
-      document.querySelector("#handoff-drawer-source").textContent = handoff.content;
+      document.querySelector("#handoff-drawer-source").textContent = content;
       drawerBackdrop.classList.add("is-open");
       drawerBackdrop.setAttribute("aria-hidden", "false");
       drawerBackdrop.inert = false;
       drawer.setAttribute("aria-hidden", "false");
       document.querySelector(".dashboard").inert = true;
       drawerClose.focus();
+    }}
+    function openTaskDetails(task) {{
+      openDetails(`${{task.id}} · Task details`, [["Task", task.title], ["Status", task.status.replaceAll("_", " ")], ["Owner", task.owner]], task.content);
+    }}
+    function openHandoffDetails(handoff) {{
+      openDetails(`${{handoff.task_id}} · Handoff details`, [["Task", `${{handoff.task_id}} · ${{handoff.task_title}}`], ["Role", handoff.role], ["Recipient", handoff.recipient || "—"], ["Outcome", handoff.outcome], ["Timestamp", handoff.timestamp]], handoff.content);
     }}
     drawerClose.addEventListener("click", closeHandoffDetails);
     drawerBackdrop.addEventListener("click", event => {{

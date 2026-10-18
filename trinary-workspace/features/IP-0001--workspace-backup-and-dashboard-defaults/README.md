@@ -1,7 +1,7 @@
 ---
 id: IP-0001
 title: Google Drive Backup and Dashboard Defaults
-status: Approved
+status: Awaiting Human Acceptance
 ---
 
 # Google Drive Backup and Dashboard Defaults
@@ -189,4 +189,6 @@ Tasks T-0001 and T-0002 were approved on 2026-10-18. The human approved adding T
 - Harness coverage: Claude and OpenCode connector behavior was not available to inspect in this session; the skill documents capability-based requirements for those harnesses.
 - End-to-end backup/restore: not run; this feature adds the workflow skill and did not create or restore a user backup.
 - Previous implementation acceptance: The user accepted T-0001 and T-0002 on 2026-10-18.
-- Current decision: T-0003 is approved for implementation; final feature acceptance is pending.
+- T-0003 dashboard verification: The feature generator completed with 3 tasks; `git diff --check` passed. The independent reviewer approved the implementation after the close-button label was made generic for task and handoff details.
+- T-0003 limitation: No tests or browser interaction checks were run. The existing drawer's close, backdrop, Escape, and focus-return behavior was reused and reviewed by inspection.
+- Current decision: Awaiting human acceptance of T-0003 and the reopened feature.

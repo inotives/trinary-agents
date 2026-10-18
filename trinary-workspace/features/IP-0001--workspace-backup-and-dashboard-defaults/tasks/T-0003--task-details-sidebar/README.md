@@ -2,7 +2,7 @@
 id: T-0003
 feature: IP-0001
 title: Open task details in the dashboard sidebar
-status: ready
+status: done
 depends_on: []
 ---
 
