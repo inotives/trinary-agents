@@ -1,7 +1,7 @@
 ---
 id: IP-0002
 title: Dashboard Security and Offline Assets
-status: Approved
+status: Implementing
 branch: fix/dashboard-security-audit
 created_at: 2026-10-18T13:26:35Z
 ---

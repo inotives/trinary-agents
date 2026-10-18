@@ -345,6 +345,10 @@ def dependency_map_layout(tasks):
     }
 
 
+def script_json(value):
+    return json.dumps(value, ensure_ascii=True, separators=(",", ":")).replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+
+
 def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_title="Feature", generated_at=None):
     tasks = sort_done_tasks(tasks)
     generated_at = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
@@ -355,14 +359,11 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
         if task["cycle_time"]["seconds"] is not None:
             total_cycle_seconds += task["cycle_time"]["seconds"]
             available_cycle_times += 1
-    dependency_layout = json.dumps(dependency_map_layout(tasks), separators=(",", ":"))
-    data = json.dumps([{key: value for key, value in task.items() if key != "handoffs"} for task in tasks], ensure_ascii=True, separators=(",", ":"))
-    # Prevent task text from escaping the script element or changing HTML parsing.
-    data = data.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+    dependency_layout = script_json(dependency_map_layout(tasks))
+    data = script_json([{key: value for key, value in task.items() if key != "handoffs"} for task in tasks])
     handoffs = [handoff for task in tasks for handoff in task.get("handoffs", [])]
     handoffs.sort(key=lambda item: (item["sort_timestamp"], item["sequence"], item["filename"], item["task_id"]), reverse=True)
-    handoff_data = json.dumps(handoffs, ensure_ascii=True, separators=(",", ":"))
-    handoff_data = handoff_data.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+    handoff_data = script_json(handoffs)
     title = html.escape(f"Trinary-AGENTs Flow :: {project_name}", quote=True)
     subtitle = html.escape(f"{feature_id}--{feature_title} workflow viewer", quote=True)
     return f'''{MARKER}

@@ -2,7 +2,7 @@
 id: T-0001
 feature: IP-0002
 title: Escape dashboard embedded JSON
-status: ready
+status: done
 depends_on: []
 ---
 

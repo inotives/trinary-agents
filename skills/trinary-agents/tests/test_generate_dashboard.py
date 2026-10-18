@@ -241,11 +241,29 @@ class DashboardGenerationTests(unittest.TestCase):
                 dashboard.generate(root)
             self.assertEqual(page.read_text(encoding="utf-8"), original)
 
-    def test_embedded_task_text_is_script_safe(self):
-        tasks = [{"id": "T-0001", "title": "</script><script>alert(1)</script>", "status": "ready", "depends_on": []}]
+    def test_all_embedded_json_is_script_safe_and_parseable(self):
+        payload = "</script><script>alert(1)</script>"
+        handoff = {
+            "task_id": payload, "task_title": payload, "role": "Worker", "recipient": "project-manager",
+            "outcome": payload, "verdict": "", "timestamp": "2026-10-18T01:00:00Z",
+            "summary": payload, "content": payload, "filename": "handoff.md",
+            "sort_timestamp": "2026-10-18T01:00:00Z", "sequence": 1,
+        }
+        tasks = [{
+            "id": payload, "title": payload, "status": "ready", "depends_on": [],
+            "handoffs": [handoff], "latest_handoff": handoff,
+        }]
         page = dashboard.render_html(tasks)
-        self.assertNotIn("</script><script>alert", page)
+        self.assertNotIn(payload, page)
         self.assertIn("\\u003c/script\\u003e", page)
+        embedded = {
+            name: re.search(rf"const {name} = (.*?);", page).group(1)
+            for name in ("tasks", "dependencyLayout", "handoffs")
+        }
+        decoded = {name: json.loads(value) for name, value in embedded.items()}
+        self.assertEqual(decoded["tasks"][0]["id"], payload)
+        self.assertIn(payload, decoded["dependencyLayout"]["nodes"])
+        self.assertEqual(decoded["handoffs"][0]["summary"], payload)
 
     def test_latest_handoff_changes_owner_and_embedded_activity(self):
         with tempfile.TemporaryDirectory() as temp:
