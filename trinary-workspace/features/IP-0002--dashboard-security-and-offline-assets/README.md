@@ -1,7 +1,7 @@
 ---
 id: IP-0002
 title: Dashboard Security and Offline Assets
-status: Implementing
+status: Awaiting Human Acceptance
 branch: fix/dashboard-security-audit
 created_at: 2026-10-18T13:26:35Z
 ---
@@ -77,17 +77,17 @@ and handoff details.
 
 ## Acceptance checks
 
-- [ ] A task-derived `</script>` sequence in JSON data is emitted in escaped
+- [x] A task-derived `</script>` sequence in JSON data is emitted in escaped
   form and cannot create a new script element.
-- [ ] `dependency_layout`, task data, and handoff data remain parseable JSON in
+- [x] `dependency_layout`, task data, and handoff data remain parseable JSON in
   the generated dashboard.
-- [ ] Generated dashboards contain no external runtime stylesheet, script,
+- [x] Generated dashboards contain no external runtime stylesheet, script,
   image, or import URL and work without network access.
-- [ ] Existing dashboard content, task interactions, dependency graph,
+- [x] Existing dashboard content, task interactions, dependency graph,
   cycle-time display, handoff details, refresh controls, and responsive layout
   remain available.
-- [ ] Vendored assets have pinned versions and source/license records.
-- [ ] Focused dashboard tests pass, and the skill instructions match the
+- [x] Vendored assets have pinned versions and source/license records.
+- [x] Focused dashboard tests pass, and the skill instructions match the
   generated-page behavior.
 
 ## Human decisions and open questions
@@ -111,5 +111,12 @@ remains queued until T-0001 is done.
 
 ## Final human acceptance
 
-- Evidence: Pending implementation and feature acceptance checks.
+- Evidence: T-0001 and T-0002 passed independent review. Regenerated the
+  dashboard with the repository-local generator. The focused command
+  `python3 -B -m unittest discover -s skills/trinary-agents/tests -p test_generate_dashboard.py`
+  passed all 28 tests. Structural scan of the generated `dashboard.html`
+  found zero CDN URLs, remote resource tags, remote CSS imports, or remote
+  module imports. `git diff --cached --check` passed before the T-0002 commit
+  (`1ff9ef4`). The browser policy prevented local-file visual inspection.
+- Decision: Awaiting explicit human acceptance.
 - Decision: Pending explicit human acceptance.
