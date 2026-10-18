@@ -99,7 +99,15 @@ and handoff details.
 
 ## Task breakdown
 
-To be proposed after approval of this feature plan.
+1. [T-0001: Escape dashboard embedded JSON](tasks/T-0001--escape-dashboard-embedded-json/README.md) — no dependencies.
+2. [T-0002: Vendor and embed dashboard assets](tasks/T-0002--vendor-and-embed-dashboard-assets/README.md) — depends on T-0001.
+
+The JSON escaping fix is isolated first. Asset embedding and the generated-page
+network check follow it because both tasks update the generator and dashboard
+tests.
+
+Task breakdown approved by the user on 2026-10-18. T-0001 is ready and T-0002
+remains queued until T-0001 is done.
 
 ## Final human acceptance
 
