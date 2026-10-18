@@ -15,6 +15,7 @@ Deliver two small improvements to Trinary Agents:
 
 1. Generate the task dashboard for every feature with at least one task, including single-task features.
 2. Add a portable agent skill that lets an agent back up and restore the complete project `trinary-workspace/` directory through its connected Google Drive connector.
+3. Let users open task README details from dashboard cards in the same sidebar used for handoff details.
 
 A backup is successful only when the uploaded snapshot can be fetched back and its archive and file checksums verify. A restore is successful only after the snapshot is validated and the files are restored to the requested location.
 
@@ -43,6 +44,7 @@ The skill uses capability-based instructions that apply across Codex, Claude, Op
 - Before creating an archive, check that the active harness exposes the required Drive capabilities, that the connector is authenticated, and that the dedicated destination folder, or its parent when the folder does not yet exist, can be listed/read. If any check fails, stop before creating/uploading an archive and tell the user which capability, connection, or permission is missing and how to enable or authorize the Drive connector.
 - Do not create a temporary test file just to probe write permission. The actual snapshot upload is the write-permission check; if Drive denies it, stop and explain that the selected folder needs write access.
 - Store one timestamped ZIP archive per snapshot in a dedicated Drive folder named `Trinary Workspace Backups/<project>`.
+- Add a task details button to each dashboard card. Open the task's README in the existing handoff details sidebar, as read-only plain text.
 - Include a manifest containing relative file paths, sizes, and SHA-256 checksums; verify the fetched archive and every listed file before reporting success or restoring.
 - Restore only after validating the snapshot. Refuse to overwrite an existing workspace unless the user explicitly confirms replacement.
 - Preserve all snapshots. Do not delete backups unless the user explicitly requests deletion.
@@ -81,6 +83,7 @@ The skill uses capability-based instructions that apply across Codex, Claude, Op
 
 - Generate a read-only feature dashboard whenever at least one task README is present.
 - Keep task READMEs canonical for status and dependencies; timestamped handoffs supply activity and recipients.
+- Let each task card open its complete task README in the same accessible sidebar used for handoff details.
 - Preserve the existing behavior for a feature with no tasks.
 - Continue refusing to overwrite a dashboard that lacks the generator's marker.
 
@@ -135,6 +138,8 @@ The skill uses capability-based instructions that apply across Codex, Claude, Op
 - Restore does not alter an existing workspace without explicit user confirmation.
 - The workflow preserves earlier snapshots and does not delete Drive files automatically.
 - Missing connector or local archive capability produces a clear stop condition rather than a CLI/API fallback.
+- Each task card has an accessible details button that opens that task's complete README in the handoff sidebar; handoff detail buttons continue to work in the same sidebar.
+- Task README content is rendered as text, and the existing close, Escape, and focus-return behavior works for both detail types.
 
 ## Relevant repository areas
 
@@ -157,6 +162,7 @@ The skill uses capability-based instructions that apply across Codex, Claude, Op
 - Requested cross-harness support for Codex, Claude, and OpenCode when their agents have Google Drive connectors with suitable permissions.
 - Requested a connector readiness check before archive creation and actionable suggestions if connection or permissions are unavailable.
 - Requested dashboard generation as the default for features with one or more tasks, including single-task features.
+- Requested an accessible task details button on dashboard cards that opens task README details in the existing handoff sidebar; approved adding this as a new task on 2026-10-18.
 - Approved the feature plan on 2026-10-18.
 - Approved the two-task breakdown on 2026-10-18.
 
@@ -170,10 +176,17 @@ None.
 | --- | --- | --- | --- |
 | [T-0001](tasks/T-0001--generate-single-task-dashboards/README.md) | Generate dashboards for single-task features | None | Update the generator, focused test, and Trinary Agents workflow instructions; retain zero-task and unmarked-dashboard safety behavior. |
 | [T-0002](tasks/T-0002--google-drive-backup-skill/README.md) | Add cross-harness Google Drive backup skill | None | Add the standalone backup/restore skill and repository README entry, with connector capability/authentication/access preflight and safe snapshot handling. |
+| [T-0003](tasks/T-0003--task-details-sidebar/README.md) | Open task details in the dashboard sidebar | None | Add an accessible detail button to each task card and display the task README in the existing handoff details sidebar. |
 
-These tasks are ordered so the dashboard behavior is Task 1 as requested. They are independent and can be reviewed separately. Task breakdown approved by the human on 2026-10-18.
+Tasks T-0001 and T-0002 were approved on 2026-10-18. The human approved adding T-0003 on 2026-10-18; it is independent of the completed tasks.
 
 ## Final human acceptance
 
-- Evidence: The human approved this plan on 2026-10-18.
-- Decision: Plan approved; implementation acceptance is pending.
+- Implementation commits: `f985766` (single-task dashboard generation) and `bff7e53` (Google Drive backup skill).
+- Dashboard verification: `python3 -B -m unittest discover -s skills/trinary-agents/tests -p test_generate_dashboard.py` passed (27 tests); `git diff --check` passed.
+- Backup-skill review: independent reviewer approved the skill after verifying read-only preflight occurs before archive creation, Drive folder creation follows local archive verification, and upload precedes fetch-back verification.
+- Drive readiness check in this Codex session: profile check passed; search and root-folder listing succeeded; required profile, search/list, upload, and fetch tools are available. No backup folder was created and no file was uploaded.
+- Harness coverage: Claude and OpenCode connector behavior was not available to inspect in this session; the skill documents capability-based requirements for those harnesses.
+- End-to-end backup/restore: not run; this feature adds the workflow skill and did not create or restore a user backup.
+- Previous implementation acceptance: The user accepted T-0001 and T-0002 on 2026-10-18.
+- Current decision: T-0003 is approved for implementation; final feature acceptance is pending.
