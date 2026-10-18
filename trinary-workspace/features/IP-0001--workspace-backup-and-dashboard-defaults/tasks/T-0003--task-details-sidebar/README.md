@@ -26,6 +26,7 @@ None.
 ## Acceptance criteria
 
 - Every task card has an accessible details button with a task-specific label.
+- The task details button sits at the top-right of the task card, aligned consistently with the handoff detail button.
 - Clicking the button shows the selected task's full README in the existing details sidebar.
 - Task README content is inserted as text, not interpreted as HTML.
 - The existing close button, backdrop, Escape key, and focus return work for both handoff and task details.

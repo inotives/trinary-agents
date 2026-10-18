@@ -439,6 +439,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     .kanban-lane-count {{ color: #67e8f9; font: 700 .67rem/1 ui-monospace, SFMono-Regular, monospace; }}
     .kanban-lane-cards {{ display: grid; align-content: start; gap: .5rem; min-height: 0; overflow: auto; padding: .55rem; }}
     .task-card {{ display: grid; gap: .42rem; padding: .65rem; border: 1px solid rgba(105, 139, 180, .22); border-radius: .72rem; background: linear-gradient(130deg, rgba(21, 34, 54, .95), rgba(12, 22, 38, .95)); }}
+    .task-card-header {{ display: flex; justify-content: space-between; align-items: center; gap: .5rem; }}
     .task-card-blocked {{ border-color: rgba(248, 113, 113, .9); background: linear-gradient(130deg, rgba(127, 29, 29, .58), rgba(69, 10, 10, .72)); box-shadow: 0 0 14px rgba(239, 68, 68, .2); }}
     .task-card-id {{ margin: 0; color: #67e8f9; font: 700 .65rem/1.2 ui-monospace, SFMono-Regular, monospace; letter-spacing: .06em; }}
     .task-card-title {{ margin: 0; color: #f1f5f9; font-size: .8rem; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }}
@@ -652,7 +653,17 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
       const cards = column.append("div").attr("class", "kanban-lane-cards").selectAll("article").data(laneTasks).join("article").attr("class", task => task.status === "blocked" ? "task-card task-card-blocked" : "task-card");
       cards.each(function(task) {{
         const card = d3.select(this);
-        card.append("p").attr("class", "task-card-id").text(task.id);
+        const cardHeader = card.append("div").attr("class", "task-card-header");
+        cardHeader.append("p").attr("class", "task-card-id").text(task.id);
+        const detailButton = cardHeader.append("button").attr("class", "btn btn-circle btn-ghost btn-xs handoff-detail-button task-detail-button")
+          .attr("type", "button")
+          .attr("aria-label", `Show full details for ${{task.id}} task`)
+          .attr("title", `Show full details for ${{task.id}} task`)
+          .on("click", () => openTaskDetails(task));
+        const detailIcon = detailButton.append("svg").attr("class", "handoff-detail-icon")
+          .attr("viewBox", "0 0 24 24").attr("aria-hidden", "true");
+        detailIcon.append("circle").attr("cx", 12).attr("cy", 12).attr("r", 9);
+        detailIcon.append("path").attr("d", "M12 11v5m0-8h.01");
         card.append("h3").attr("class", "task-card-title").text(task.title);
         card.append("span").attr("class", "task-card-status").text(task.status.replaceAll("_", " "));
         if (task.status === "blocked") card.append("span").attr("class", "task-card-alert").text("Human action required");
@@ -667,15 +678,6 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
         field("Depends", task.depends_on.length ? task.depends_on.join(", ") : "None");
         field("Latest handoff", `${{task.latest_handoff.role}} · ${{task.latest_handoff.outcome}} · ${{task.latest_handoff.timestamp}}`);
         if (task.latest_handoff.summary) card.append("p").attr("class", "task-card-summary").text(task.latest_handoff.summary);
-        const detailButton = card.append("button").attr("class", "btn btn-circle btn-ghost btn-xs handoff-detail-button task-detail-button")
-          .attr("type", "button")
-          .attr("aria-label", `Show full details for ${{task.id}} task`)
-          .attr("title", `Show full details for ${{task.id}} task`)
-          .on("click", () => openTaskDetails(task));
-        const detailIcon = detailButton.append("svg").attr("class", "handoff-detail-icon")
-          .attr("viewBox", "0 0 24 24").attr("aria-hidden", "true");
-        detailIcon.append("circle").attr("cx", 12).attr("cy", 12).attr("r", 9);
-        detailIcon.append("path").attr("d", "M12 11v5m0-8h.01");
       }});
     }});
     d3.select("#handoff-total").text(`${{handoffs.length}} handoffs`);
