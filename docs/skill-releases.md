@@ -1,0 +1,28 @@
+# Skill releases
+
+This repository publishes `trinary-agents` and `trinary-workspace-backup` as
+separate GitHub Releases. Each release includes a ZIP containing the skill's
+folder at the archive root, ready to upload to Claude's Skills settings.
+
+## Versioning and publishing
+
+- Each skill has its own `VERSION` file and Semantic Versioning sequence.
+- When a pull request changes a skill folder, it must increase that skill's
+  version in the same pull request. The pull request check validates the
+  version format and requires it to increase from the base branch.
+- The `validate-version-bumps` check runs on every pull request to `main` and
+  should be required by the `Protect main` ruleset. The importable ruleset
+  configuration is in `.github/rulesets/protect-main.json`.
+- Merging to `main` runs the publishing workflow for both skills. It creates a
+  release only for a version whose tag has not been published yet. Unchanged
+  versions are skipped, so unrelated repository merges do not create duplicate
+  releases.
+- Tags use `<skill-name>-v<version>`, for example
+  `trinary-agents-v1.0.0` and `trinary-workspace-backup-v1.0.0`.
+- Releases are published with ZIP assets named
+  `<skill-name>-v<version>.zip`. The ZIP contains the skill directory itself,
+  so the `SKILL.md` file remains inside the folder when imported.
+
+The initial versions are `1.0.0` for both skills. A manual workflow run can
+retry a release if its first publishing attempt fails; already published
+versions are skipped.
