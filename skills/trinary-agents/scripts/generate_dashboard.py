@@ -17,6 +17,39 @@ HANDOFF_FIELD = re.compile(
     re.I,
 )
 HANDOFF_VERDICT = re.compile(r"^\s*(?:-\s*)?(?:\*\*)?VERDICT\s*:\s*(.*?)\s*(?:\*\*)?\s*$", re.I)
+DASHBOARD_ASSETS = Path(__file__).resolve().parent.parent / "assets" / "dashboard"
+
+
+def read_dashboard_assets():
+    files = {
+        "daisyui_css": "daisyui-5.7.50.css",
+        "tailwind_browser_js": "tailwind-browser-4.3.3.js",
+        "d3_js": "d3-7.9.0.min.js",
+    }
+    assets = {key: (DASHBOARD_ASSETS / name).read_text(encoding="utf-8") for key, name in files.items()}
+    if "</style" in assets["daisyui_css"].lower():
+        raise ValueError("DaisyUI asset contains a style-closing sequence")
+    if any("</script" in assets[key].lower() for key in ("tailwind_browser_js", "d3_js")):
+        raise ValueError("dashboard JavaScript asset contains a script-closing sequence")
+
+    licenses = [
+        ("Tailwind CSS Browser 4.3.3 — MIT", "LICENSE-tailwind-browser-MIT.txt"),
+        ("DaisyUI 5.7.50 — MIT", "LICENSE-daisyui-MIT.txt"),
+        ("D3 7.9.0 — ISC", "LICENSE-d3-ISC.txt"),
+        ("D3 Ease 3.0.1 — BSD-3-Clause", "LICENSE-d3-ease-BSD-3-Clause.txt"),
+        ("robust-predicates 3.0.3 — Unlicense", "LICENSE-robust-predicates-Unlicense.txt"),
+        ("Commander 7.2.0 — MIT", "LICENSE-commander-MIT.txt"),
+        ("iconv-lite 0.6.3 — MIT", "LICENSE-iconv-lite-MIT.txt"),
+        ("safer-buffer 2.1.2 — MIT", "LICENSE-safer-buffer-MIT.txt"),
+        ("rw 1.3.3 — BSD-3-Clause", "LICENSE-rw-BSD-3-Clause.txt"),
+    ]
+    assets["license_notices"] = "\n\n".join(
+        f"{name}\n{(DASHBOARD_ASSETS / filename).read_text(encoding='utf-8').strip()}"
+        for name, filename in licenses
+    )
+    if "-->" in assets["license_notices"]:
+        raise ValueError("dashboard license notice contains an HTML comment terminator")
+    return assets
 
 
 def scalar(value):
@@ -355,7 +388,12 @@ def dependency_map_layout(tasks):
     }
 
 
+def script_json(value):
+    return json.dumps(value, ensure_ascii=True, separators=(",", ":")).replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+
+
 def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_title="Feature", generated_at=None):
+    assets = read_dashboard_assets()
     tasks = sort_done_tasks(tasks)
     generated_at = generated_at or datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     total_cycle_seconds = 0
@@ -490,7 +528,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     .refresh-interval-control {{ display: grid; grid-template-columns: auto auto; align-items: center; gap: 0 .4rem; color: #c3d1e2; font-size: .63rem; }}
     .refresh-interval-control input {{ grid-column: 1 / -1; width: 7.5rem; height: .7rem; margin: 0; accent-color: #22d3ee; }}
     .refresh-interval-value {{ color: #a5f3fc; font: 700 .62rem/1 ui-monospace, SFMono-Regular, monospace; }}
-    .refresh-icon {{ display: block; filter: brightness(0) invert(1); transform-box: fill-box; transform-origin: center; }}
+    .refresh-icon {{ display: block; filter: brightness(0) invert(1); transform-box: fill-box; transform-origin: center; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }}
     .refresh-control[aria-pressed="true"] {{ border-color: rgba(74, 222, 128, .8); background: #16a34a; color: #fff; box-shadow: 0 0 18px rgba(34, 197, 94, .35); }}
     .refresh-control[aria-pressed="true"] .refresh-icon {{ animation: refresh-spin 1.5s linear infinite; }}
     @keyframes refresh-spin {{ to {{ transform: rotate(360deg); }} }}
@@ -790,6 +828,9 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     refreshControl.addEventListener("click", () => setAutoRefreshEnabled(refreshControl.getAttribute("aria-pressed") !== "true"));
     setAutoRefreshEnabled(window.location.hash === autoRefreshHash);
   </script>
+  <!--
+{assets['license_notices']}
+  -->
 </body>
 </html>
 '''
