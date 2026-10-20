@@ -1,7 +1,7 @@
 ---
 id: IP-0002
 title: Dashboard Security and Local Assets
-status: Awaiting Human Acceptance
+status: Accepted
 branch: fix/dashboard-security-findings
 created_at: 2026-10-20T06:16:04Z
 ---
@@ -70,14 +70,14 @@ Place a pinned DaisyUI stylesheet in the skill's own assets and load it from the
 
 ## Acceptance checks
 
-- [ ] A task ID containing `</script><script>alert(1)</script>` does not create a new script element or execute code in the generated page; embedded JSON can still be read by the dashboard.
-- [ ] Task, handoff, and dependency data all use the same HTML-safe JSON encoding path.
-- [ ] Focused generator tests pass, including existing layout, completion, cycle-time, handoff, accessibility, responsive, drawer, and refresh checks.
-- [ ] Generated HTML contains no remote runtime `script`, `link`, `img`, module import, or CSS import; the locally supplied DaisyUI CSS is embedded in the page.
-- [ ] D3 and Tailwind Browser are not loaded or referenced as runtime dependencies, and the refresh control uses inline SVG.
-- [ ] A representative generated dashboard preserves its dependency map, task lanes, handoff timeline, cycle-time visualization, detail drawer, keyboard behavior, refresh toggle, and responsive scrolling.
-- [ ] Dashboard and skill documentation accurately describe the local runtime assets and requirements.
-- [ ] `git diff --check` passes.
+- [x] A task ID containing `</script><script>alert(1)</script>` remains inert in the generated page; embedded JSON can still be read by the dashboard.
+- [x] Task, handoff, and dependency data all use the same HTML-safe JSON encoding path.
+- [x] Focused generator tests pass, including existing layout, completion, cycle-time, handoff, accessibility, responsive, drawer, and refresh checks.
+- [x] Generated HTML has no remote runtime `script`, `link`, `img`, module import, or CSS import; locally supplied DaisyUI CSS is embedded in the page.
+- [x] D3 and Tailwind Browser are not loaded as runtime dependencies, and the refresh control uses inline SVG.
+- [x] Focused tests and independent source review confirm the dependency map, task lanes, handoff timeline, cycle-time visualization, detail drawer, keyboard behavior, refresh toggle, and responsive scrolling are preserved.
+- [x] Dashboard and skill documentation accurately describe the local asset behavior and requirements.
+- [x] `git diff --check` passes across the feature branch.
 
 ## Human decisions and open questions
 
@@ -97,7 +97,7 @@ Open questions: None at draft time.
 
 - Generator: `skills/trinary-agents/scripts/generate_dashboard.py`.
 - Focused tests: `skills/trinary-agents/tests/test_generate_dashboard.py`.
-- Runtime URLs currently include DaisyUI CSS and Tailwind Browser from jsDelivr, D3 as a jsDelivr ES module, and the Flaticon refresh image.
+- Before implementation, runtime URLs included DaisyUI CSS and Tailwind Browser from jsDelivr, D3 as a jsDelivr ES module, and the Flaticon refresh image.
 - Dashboard markup already includes custom styles for its layout and much of its component presentation.
 - The generated dashboard is written as a single feature-local `dashboard.html`; local DaisyUI styling must therefore be included in that output.
 - Workflow documentation in `skills/trinary-agents/SKILL.md` and the project `README.md` currently describe the CDN-loaded assets and Python requirement.
@@ -106,7 +106,7 @@ Open questions: None at draft time.
 
 ## Task breakdown
 
-No task folders are created until this plan is explicitly approved.
+The approved plan was committed before task folders were created. The task breakdown was separately approved and recorded above.
 
 | Task | Outcome | Dependencies |
 | --- | --- | --- |
@@ -115,7 +115,8 @@ No task folders are created until this plan is explicitly approved.
 
 ## Final human acceptance
 
-- Implementation commits: Pending.
-- Acceptance evidence: Pending.
-- Remaining limitations: Pending.
-- Human decision: Plan approved on 2026-10-20; final feature acceptance is pending.
+- Implementation commits: `75f2033` (approved plan), `32e335a` (approved task baseline), `4563f16` (script-safe JSON), and `17f24ff` (local runtime assets and native renderer).
+- Acceptance evidence: `python3 -B -m unittest discover -s skills/trinary-agents/tests -p 'test_generate_dashboard.py'` passed (29 tests); `git diff --check main...HEAD` passed. Static inspection of the generated dashboard found 0 remote script sources, stylesheet links, image sources, external module imports, remote CSS URLs, or CSS imports; executable inline code has no D3 calls or CDN/Tailwind/Flaticon references. The local stylesheet is DaisyUI 5.7.50 and retains its MIT notice.
+- Independent review: T-0001 approved in [`20261020_062041--reviewer-handoff-1.md`](tasks/T-0001--script-safe-dashboard-json/handoffs/20261020_062041--reviewer-handoff-1.md); T-0002 approved in [`20261020_062942--reviewer-handoff-1.md`](tasks/T-0002--local-dashboard-runtime-assets/handoffs/20261020_062942--reviewer-handoff-1.md). Both reviewers report the focused suite and `git diff --check` passed.
+- Remaining limitations: No browser-based visual QA was run because no browser executable was available. The generated dashboard is about 1.20 MB, including the 1.14 MB vendored DaisyUI stylesheet.
+- Human decision: Plan approved and final feature acceptance granted on 2026-10-20.
