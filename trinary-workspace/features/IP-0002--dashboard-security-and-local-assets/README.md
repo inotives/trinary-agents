@@ -89,6 +89,7 @@ Decisions recorded from the human:
 - Remove the Tailwind Browser script, which appears unused.
 - Split the work into two sequential, separately reviewed tasks, with JSON hardening first.
 - Plan approval: The human approved IP-0002 on 2026-10-20.
+- Task breakdown approval: The human approved T-0001 followed by T-0002 on 2026-10-20.
 
 Open questions: None at draft time.
 
@@ -109,8 +110,8 @@ No task folders are created until this plan is explicitly approved.
 
 | Task | Outcome | Dependencies |
 | --- | --- | --- |
-| T-0001 — Make embedded dashboard JSON script-safe | Encode all inline-script JSON consistently and add task-ID injection regression coverage. | None |
-| T-0002 — Remove dashboard CDN runtime dependencies | Replace D3 and Flaticon, remove Tailwind Browser, vendor and inline DaisyUI CSS, update tests and documentation, and verify dashboard behavior. | T-0001 |
+| [T-0001 — Make embedded dashboard JSON script-safe](tasks/T-0001--script-safe-dashboard-json/README.md) | Encode all inline-script JSON consistently and add task-ID injection regression coverage. | None |
+| [T-0002 — Remove dashboard CDN runtime dependencies](tasks/T-0002--local-dashboard-runtime-assets/README.md) | Replace D3 and Flaticon, remove Tailwind Browser, vendor and inline DaisyUI CSS, update tests and documentation, and verify dashboard behavior. | T-0001 |
 
 ## Final human acceptance
 
