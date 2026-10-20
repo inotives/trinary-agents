@@ -2,7 +2,7 @@
 id: T-0002
 feature: IP-0002
 title: Remove dashboard CDN runtime dependencies
-status: queued
+status: ready
 depends_on:
   - T-0001
 ---

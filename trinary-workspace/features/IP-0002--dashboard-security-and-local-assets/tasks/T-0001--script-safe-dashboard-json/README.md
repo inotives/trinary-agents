@@ -2,7 +2,7 @@
 id: T-0001
 feature: IP-0002
 title: Make embedded dashboard JSON script-safe
-status: ready
+status: done
 depends_on: []
 ---
 

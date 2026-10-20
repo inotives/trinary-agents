@@ -149,6 +149,16 @@ def sortable_handoff_timestamp(value):
     return parsed.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
+def html_safe_json(value):
+    """Serialize JSON so its contents cannot terminate an HTML script element."""
+    return (
+        json.dumps(value, ensure_ascii=True, separators=(",", ":"))
+        .replace("&", "\\u0026")
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+    )
+
+
 def latest_handoff(handoffs):
     if not handoffs:
         return {"role": "—", "recipient": "", "outcome": "No handoff yet", "timestamp": "—", "sort_timestamp": "", "summary": ""}
@@ -355,14 +365,11 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
         if task["cycle_time"]["seconds"] is not None:
             total_cycle_seconds += task["cycle_time"]["seconds"]
             available_cycle_times += 1
-    dependency_layout = json.dumps(dependency_map_layout(tasks), separators=(",", ":"))
-    data = json.dumps([{key: value for key, value in task.items() if key != "handoffs"} for task in tasks], ensure_ascii=True, separators=(",", ":"))
-    # Prevent task text from escaping the script element or changing HTML parsing.
-    data = data.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+    dependency_layout = html_safe_json(dependency_map_layout(tasks))
+    data = html_safe_json([{key: value for key, value in task.items() if key != "handoffs"} for task in tasks])
     handoffs = [handoff for task in tasks for handoff in task.get("handoffs", [])]
     handoffs.sort(key=lambda item: (item["sort_timestamp"], item["sequence"], item["filename"], item["task_id"]), reverse=True)
-    handoff_data = json.dumps(handoffs, ensure_ascii=True, separators=(",", ":"))
-    handoff_data = handoff_data.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+    handoff_data = html_safe_json(handoffs)
     title = html.escape(f"Trinary-AGENTs Flow :: {project_name}", quote=True)
     subtitle = html.escape(f"{feature_id}--{feature_title} workflow viewer", quote=True)
     return f'''{MARKER}

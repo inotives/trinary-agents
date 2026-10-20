@@ -247,6 +247,19 @@ class DashboardGenerationTests(unittest.TestCase):
         self.assertNotIn("</script><script>alert", page)
         self.assertIn("\\u003c/script\\u003e", page)
 
+    def test_embedded_script_closing_task_id_is_safe_and_dependency_data_stays_valid(self):
+        task_id = "</script><script>alert(1)</script>"
+        tasks = [{"id": task_id, "title": "Malicious ID", "status": "ready", "depends_on": []}]
+        page = dashboard.render_html(tasks)
+
+        self.assertNotIn(task_id, page)
+        self.assertIn("\\u003c/script\\u003e\\u003cscript\\u003ealert(1)\\u003c/script\\u003e", page)
+        embedded_tasks = json.loads(re.search(r"const tasks = (\[.*?\]);", page).group(1))
+        dependency_layout = json.loads(re.search(r"const dependencyLayout = (\{.*?\});", page).group(1))
+        self.assertEqual(embedded_tasks[0]["id"], task_id)
+        self.assertIn(task_id, dependency_layout["nodes"])
+        self.assertIn(task_id, dependency_layout["isolated_ids"])
+
     def test_latest_handoff_changes_owner_and_embedded_activity(self):
         with tempfile.TemporaryDirectory() as temp:
             root = make_feature_root(temp)
