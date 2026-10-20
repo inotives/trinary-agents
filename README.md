@@ -94,7 +94,9 @@ Dashboard generation requires Python 3 and uses only the standard library; no
 Python packages need to be installed. On macOS, check with `python3 --version`.
 If the command is unavailable, install Python 3 using the macOS installer from
 [python.org](https://www.python.org/downloads/macos/), then open a new terminal
-and verify the command again.
+and verify the command again. The skill bundles DaisyUI 5.7.50 and embeds its
+stylesheet in each generated dashboard. The page uses browser-native DOM and
+SVG APIs and makes no third-party runtime requests.
 
 ## Trinary Agents UI Dashboard
 

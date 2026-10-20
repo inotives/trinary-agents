@@ -1,7 +1,7 @@
 ---
 id: IP-0002
 title: Dashboard Security and Local Assets
-status: Implementing
+status: Awaiting Human Acceptance
 branch: fix/dashboard-security-findings
 created_at: 2026-10-20T06:16:04Z
 ---

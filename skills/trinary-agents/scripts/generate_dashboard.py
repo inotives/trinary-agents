@@ -370,6 +370,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     handoffs = [handoff for task in tasks for handoff in task.get("handoffs", [])]
     handoffs.sort(key=lambda item: (item["sort_timestamp"], item["sequence"], item["filename"], item["task_id"]), reverse=True)
     handoff_data = html_safe_json(handoffs)
+    daisyui_css = (Path(__file__).resolve().parent.parent / "assets" / "daisyui-5.7.50.css").read_text(encoding="utf-8")
     title = html.escape(f"Trinary-AGENTs Flow :: {project_name}", quote=True)
     subtitle = html.escape(f"{feature_id}--{feature_title} workflow viewer", quote=True)
     return f'''{MARKER}
@@ -379,8 +380,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Feature task dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css">
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style id="daisyui-styles">{daisyui_css}</style>
   <style>
     :root {{ color-scheme: dark; }}
     html, body {{ width: 100%; height: 100%; margin: 0; }}
@@ -512,7 +512,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
       <div><p class="brand-kicker">Trinary workspace · feature monitor</p><h1>{title}</h1><p>{subtitle}</p></div>
       <div class="refresh-controls">
         <button id="refresh-graph" class="btn btn-circle btn-ghost btn-sm refresh-control" type="button" aria-label="Toggle automatic dashboard refresh" aria-pressed="false" title="Turn automatic dashboard refresh on">
-          <img class="refresh-icon" aria-hidden="true" alt="" width="20" height="20" src="https://cdn-icons-png.flaticon.com/512/3917/3917293.png">
+          <svg class="refresh-icon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5M4 17v-5h5"></path><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"></path></svg>
         </button>
         <label class="refresh-interval-control" for="refresh-interval"><span>Refresh rate</span><output id="refresh-interval-value" class="refresh-interval-value" for="refresh-interval">10 sec</output><input id="refresh-interval" type="range" min="5" max="60" step="5" value="10" aria-label="Automatic refresh interval"></label>
       </div>
@@ -546,8 +546,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     </div>
     <footer class="dashboard-footer">
       <p>Task READMEs define status and dependencies. Handoffs define latest activity and recipient; this dashboard does not edit workflow records.</p>
-      <p>Built with <a href="https://daisyui.com/">DaisyUI</a> and <a href="https://d3js.org/">D3.js</a>.</p>
-      <p>Refresh icon by <a href="https://www.magnific.com">Magnific</a> from <a href="https://www.flaticon.com/">Flaticon</a>.</p>
+      <p>Built with locally embedded DaisyUI styling and browser-native JavaScript.</p>
     </footer>
   </main>
   <div id="handoff-drawer-backdrop" class="handoff-drawer-backdrop" aria-hidden="true" inert>
@@ -557,8 +556,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
       <pre id="handoff-drawer-source" class="handoff-drawer-source"></pre>
     </aside>
   </div>
-  <script type="module">
-    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+  <script>
     const tasks = {data};
     const dependencyLayout = {dependency_layout};
     const handoffs = {handoff_data};
@@ -570,142 +568,142 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     ];
     const completed = tasks.filter(task => task.status === "done").length;
     const progress = tasks.length ? Math.round(completed * 100 / tasks.length) : 0;
-    d3.select("#completion-value").text(`${{progress}}%`);
-    d3.select("#completion-progress").property("value", progress).attr("aria-valuetext", `${{completed}} of ${{tasks.length}} tasks complete`);
-    d3.select("#completion-count").text(`${{completed}} of ${{tasks.length}} tasks complete`);
-    const cycleColors = ["#22d3ee", "#a78bfa", "#4ade80", "#fb923c", "#f472b6", "#facc15", "#60a5fa", "#2dd4bf"];
-    const cycleTimeTasks = tasks.map((task, index) => ({{ ...task, cycle_time_seconds: task.cycle_time.seconds, cycle_color: task.cycle_time.seconds === null ? "#64748b" : cycleColors[index % cycleColors.length] }}));
-    const timedTasks = cycleTimeTasks.filter(task => task.cycle_time_seconds !== null);
-    const cycleBar = d3.select("#cycle-time-bar");
-    cycleBar.attr("aria-label", timedTasks.length ? `Task cycle time breakdown: ${{timedTasks.map(task => `${{task.id}} ${{task.cycle_time.label}}`).join(", ")}}` : "Task cycle time breakdown: no positive recorded durations");
-    const cyclePopup = d3.select("#cycle-time-popup");
-    const cycleScale = d3.scaleLinear().domain([0, {total_cycle_seconds or 1}]).range([0, 1000]);
-    const cycleSegments = cycleBar.selectAll("rect").data(timedTasks).join("rect")
-      .attr("class", "cycle-time-segment")
-      .attr("aria-label", task => `${{task.id}}: ${{task.cycle_time.label}}`)
-      .attr("aria-describedby", "cycle-time-popup")
-      .attr("tabindex", 0)
-      .attr("role", "img")
-      .attr("x", (task, index) => cycleScale(d3.sum(timedTasks.slice(0, index), item => item.cycle_time_seconds)))
-      .attr("width", task => cycleScale(task.cycle_time_seconds))
-      .attr("y", 0).attr("height", 14)
-      .attr("fill", task => task.cycle_color);
-    function showCyclePopup(event, task) {{
-      const index = timedTasks.indexOf(task);
-      const center = cycleScale(d3.sum(timedTasks.slice(0, index), item => item.cycle_time_seconds) + task.cycle_time_seconds / 2);
-      cyclePopup.text(`${{task.id}} · ${{task.cycle_time.label}}`);
-      const bounds = document.querySelector(".cycle-time-breakdown").getBoundingClientRect();
-      const popupWidth = cyclePopup.node().getBoundingClientRect().width;
-      const target = cycleBar.node().getBoundingClientRect().left - bounds.left + center / 1000 * cycleBar.node().getBoundingClientRect().width;
-      const left = Math.max(popupWidth / 2 + 4, Math.min(target, bounds.width - popupWidth / 2 - 4));
-      cyclePopup.style("left", `${{left}}px`).classed("is-visible", true).attr("aria-hidden", "false");
+    document.querySelector("#completion-value").textContent = `${{progress}}%`;
+    const completionProgress = document.querySelector("#completion-progress");
+    completionProgress.value = progress;
+    completionProgress.setAttribute("aria-valuetext", `${{completed}} of ${{tasks.length}} tasks complete`);
+    document.querySelector("#completion-count").textContent = `${{completed}} of ${{tasks.length}} tasks complete`;
+    const svgNS = "http://www.w3.org/2000/svg";
+    function append(parent, tag, attrs = {{}}, text = null) {{
+      const isSvg = parent.namespaceURI === svgNS || tag === "svg";
+      const element = isSvg ? document.createElementNS(svgNS, tag) : document.createElement(tag);
+      for (const [name, value] of Object.entries(attrs)) element.setAttribute(name, String(value));
+      if (text !== null) element.textContent = String(text);
+      parent.append(element);
+      return element;
     }}
-    function hideCyclePopup() {{ cyclePopup.classed("is-visible", false).attr("aria-hidden", "true"); }}
-    cycleSegments.on("mouseenter focus", showCyclePopup).on("mouseleave blur", hideCyclePopup);
-    d3.select("#cycle-time-details").selectAll("button").data(timedTasks).join("button")
-      .attr("class", "cycle-time-detail")
-      .attr("type", "button")
-      .attr("aria-label", task => `${{task.id}}: ${{task.cycle_time.label}}`)
-      .attr("title", task => `${{task.id}}: ${{task.cycle_time.label}}`)
-      .text(task => `${{task.id}}: ${{task.cycle_time.label}}`);
+    const cycleColors = ["#22d3ee", "#a78bfa", "#4ade80", "#fb923c", "#f472b6", "#facc15", "#60a5fa", "#2dd4bf"];
+    const cycleTimeTasks = tasks.map((task, index) => ({{ ...task, cycle_color: task.cycle_time.seconds === null ? "#64748b" : cycleColors[index % cycleColors.length] }}));
+    const timedTasks = cycleTimeTasks.filter(task => task.cycle_time.seconds !== null);
+    const cycleBar = document.querySelector("#cycle-time-bar");
+    cycleBar.setAttribute("aria-label", timedTasks.length ? `Task cycle time breakdown: ${{timedTasks.map(task => `${{task.id}} ${{task.cycle_time.label}}`).join(", ")}}` : "Task cycle time breakdown: no positive recorded durations");
+    const cyclePopup = document.querySelector("#cycle-time-popup");
+    const cycleTotal = {total_cycle_seconds or 1};
+    let cycleOffset = 0;
+    const cycleSegments = timedTasks.map((task, index) => {{
+      const start = cycleOffset;
+      cycleOffset += task.cycle_time.seconds;
+      const segment = append(cycleBar, "rect", {{
+        class: "cycle-time-segment",
+        "aria-label": `${{task.id}}: ${{task.cycle_time.label}}`,
+        "aria-describedby": "cycle-time-popup", tabindex: 0, role: "img",
+        x: start / cycleTotal * 1000, width: task.cycle_time.seconds / cycleTotal * 1000,
+        y: 0, height: 14, fill: task.cycle_color
+      }});
+      segment.dataset.cycleTaskId = task.id;
+      return segment;
+    }});
+    function showCyclePopup(event) {{
+      const task = timedTasks[cycleSegments.indexOf(event.currentTarget)];
+      const segmentIndex = timedTasks.indexOf(task);
+      const before = timedTasks.slice(0, segmentIndex).reduce((sum, item) => sum + item.cycle_time.seconds, 0);
+      const center = (before + task.cycle_time.seconds / 2) / cycleTotal * 1000;
+      cyclePopup.textContent = `${{task.id}} · ${{task.cycle_time.label}}`;
+      const bounds = document.querySelector(".cycle-time-breakdown").getBoundingClientRect();
+      const popupWidth = cyclePopup.getBoundingClientRect().width;
+      const target = cycleBar.getBoundingClientRect().left - bounds.left + center / 1000 * cycleBar.getBoundingClientRect().width;
+      const left = Math.max(popupWidth / 2 + 4, Math.min(target, bounds.width - popupWidth / 2 - 4));
+      cyclePopup.style.left = `${{left}}px`;
+      cyclePopup.classList.add("is-visible");
+      cyclePopup.setAttribute("aria-hidden", "false");
+    }}
+    function hideCyclePopup() {{ cyclePopup.classList.remove("is-visible"); cyclePopup.setAttribute("aria-hidden", "true"); }}
+    cycleSegments.forEach(segment => {{ segment.addEventListener("mouseenter", showCyclePopup); segment.addEventListener("focus", showCyclePopup); segment.addEventListener("mouseleave", hideCyclePopup); segment.addEventListener("blur", hideCyclePopup); }});
+    const cycleDetails = document.querySelector("#cycle-time-details");
+    timedTasks.forEach(task => append(cycleDetails, "button", {{ class: "cycle-time-detail", type: "button", "aria-label": `${{task.id}}: ${{task.cycle_time.label}}`, title: `${{task.id}}: ${{task.cycle_time.label}}` }}, `${{task.id}}: ${{task.cycle_time.label}}`));
     const nodeWidth = 92, nodeHeight = 36, columnGap = 38, rowGap = 12, pad = 12;
     const graphWidth = dependencyLayout.width, graphHeight = dependencyLayout.height;
     const nodePositions = new Map(Object.entries(dependencyLayout.nodes));
-    const dependencyRoot = d3.select("#dependency-scroll").append("svg")
-      .attr("class", "dependency-graph").attr("width", graphWidth).attr("height", graphHeight)
-      .attr("viewBox", `0 0 ${{graphWidth}} ${{graphHeight}}`).attr("aria-hidden", "true");
+    const dependencyScroll = document.querySelector("#dependency-scroll");
+    const dependencyRoot = append(dependencyScroll, "svg", {{ class: "dependency-graph", width: graphWidth, height: graphHeight, viewBox: `0 0 ${{graphWidth}} ${{graphHeight}}`, "aria-hidden": "true" }});
     if (dependencyLayout.isolated_group) {{
-      const isolatedGroup = dependencyRoot.append("g").attr("class", "dependency-isolated-group")
-        .attr("transform", `translate(${{dependencyLayout.isolated_group.x}},${{dependencyLayout.isolated_group.y}})`);
-      isolatedGroup.append("rect").attr("width", dependencyLayout.isolated_group.width).attr("height", dependencyLayout.isolated_group.height).attr("rx", 8);
-      isolatedGroup.append("text").attr("class", "dependency-isolated-label").attr("x", 10).attr("y", 19).text("Isolated tasks");
+      const isolatedGroup = append(dependencyRoot, "g", {{ class: "dependency-isolated-group", transform: `translate(${{dependencyLayout.isolated_group.x}},${{dependencyLayout.isolated_group.y}})` }});
+      append(isolatedGroup, "rect", {{ width: dependencyLayout.isolated_group.width, height: dependencyLayout.isolated_group.height, rx: 8 }});
+      append(isolatedGroup, "text", {{ class: "dependency-isolated-label", x: 10, y: 19 }}, "Isolated tasks");
     }}
-    const textEquivalent = d3.select("#dependency-summary").append("ol")
-      .attr("aria-label", "Tasks and prerequisite relationships");
-    textEquivalent.selectAll("li").data(tasks).join("li")
-      .text(task => `${{task.id}} — ${{task.title}}; status: ${{task.status.replaceAll("_", " ")}}; prerequisites: ${{task.depends_on.length ? task.depends_on.join(", ") : "none"}}.`);
-    dependencyRoot.append("defs").append("marker").attr("id", "dependency-arrow")
-      .attr("viewBox", "0 0 10 10").attr("refX", 9).attr("refY", 5)
-      .attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto-start-reverse")
-      .append("path").attr("d", "M 0 0 L 10 5 L 0 10 z").attr("fill", "rgba(103, 232, 249, .8)");
+    const textEquivalent = append(document.querySelector("#dependency-summary"), "ol", {{ "aria-label": "Tasks and prerequisite relationships" }});
+    tasks.forEach(task => append(textEquivalent, "li", {{}}, `${{task.id}} — ${{task.title}}; status: ${{task.status.replaceAll("_", " ")}}; prerequisites: ${{task.depends_on.length ? task.depends_on.join(", ") : "none"}}.`));
+    const defs = append(dependencyRoot, "defs");
+    const marker = append(defs, "marker", {{ id: "dependency-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" }});
+    append(marker, "path", {{ d: "M 0 0 L 10 5 L 0 10 z", fill: "rgba(103, 232, 249, .8)" }});
     const edges = tasks.flatMap(task => task.depends_on.map(dependency => ({{ source: dependency, target: task.id }})));
-    dependencyRoot.append("g").attr("aria-hidden", "true").selectAll("path").data(edges).join("path")
-      .attr("class", "dependency-edge").attr("marker-end", "url(#dependency-arrow)")
-      .attr("d", edge => {{
-        const source = nodePositions.get(edge.source), target = nodePositions.get(edge.target);
+    const edgeGroup = append(dependencyRoot, "g", {{ "aria-hidden": "true" }});
+    edges.forEach(edge => {{
+      const source = nodePositions.get(edge.source), target = nodePositions.get(edge.target);
       const x1 = source.x + nodeWidth, y1 = source.y + nodeHeight / 2;
-        const x2 = target.x, y2 = target.y + nodeHeight / 2, bend = (x2 - x1) / 2;
-        return `M ${{x1}} ${{y1}} C ${{x1 + bend}} ${{y1}}, ${{x2 - bend}} ${{y2}}, ${{x2}} ${{y2}}`;
-      }});
-    const graphNodes = dependencyRoot.append("g").selectAll("g").data(tasks).join("g")
-      .attr("class", "dependency-node").attr("data-status", task => task.status)
-      .attr("transform", task => {{ const pos = nodePositions.get(task.id); return `translate(${{pos.x}},${{pos.y}})`; }});
+      const x2 = target.x, y2 = target.y + nodeHeight / 2, bend = (x2 - x1) / 2;
+      append(edgeGroup, "path", {{ class: "dependency-edge", "marker-end": "url(#dependency-arrow)", d: `M ${{x1}} ${{y1}} C ${{x1 + bend}} ${{y1}}, ${{x2 - bend}} ${{y2}}, ${{x2}} ${{y2}}` }});
+    }});
     const statusSymbols = {{ queued: "○", ready: "◇", needs_human: "?", waiting_human: "⌛", in_progress: "▶", changes_requested: "↻", review: "◷", blocked: "!", done: "✓" }};
     const statuses = ["queued", "ready", "needs_human", "waiting_human", "in_progress", "changes_requested", "review", "blocked", "done"];
-    const legend = d3.select("#dependency-legend").selectAll("span").data(statuses).join("span")
-      .attr("class", "dependency-legend-item").attr("data-status", status => status);
-    legend.append("span").attr("class", "dependency-legend-symbol").attr("aria-hidden", "true").text(status => statusSymbols[status]);
-    legend.append("span").text(status => status.replaceAll("_", " "));
-    graphNodes.append("rect").attr("width", nodeWidth).attr("height", nodeHeight).attr("rx", 8);
-    graphNodes.append("text").attr("class", "dependency-node-id").attr("x", 8).attr("y", 22).text(task => task.id);
-    graphNodes.append("text").attr("class", "dependency-node-icon").attr("x", nodeWidth - 20).attr("y", 23)
-      .attr("text-anchor", "middle").attr("aria-hidden", "true").text(task => statusSymbols[task.status] || "?");
-    const lanes = d3.select("#kanban-board").selectAll("section").data(laneDefinitions).join("section").attr("class", "kanban-lane").attr("aria-label", lane => lane.name);
-    lanes.each(function(lane) {{
-      const column = d3.select(this);
+    const legend = document.querySelector("#dependency-legend");
+    statuses.forEach(status => {{
+      const item = append(legend, "span", {{ class: "dependency-legend-item", "data-status": status }});
+      append(item, "span", {{ class: "dependency-legend-symbol", "aria-hidden": "true" }}, statusSymbols[status]);
+      append(item, "span", {{}}, status.replaceAll("_", " "));
+    }});
+    const graphNodes = append(dependencyRoot, "g");
+    tasks.forEach(task => {{
+      const pos = nodePositions.get(task.id);
+      const node = append(graphNodes, "g", {{ class: "dependency-node", "data-status": task.status, transform: `translate(${{pos.x}},${{pos.y}})` }});
+      append(node, "rect", {{ width: nodeWidth, height: nodeHeight, rx: 8 }});
+      append(node, "text", {{ class: "dependency-node-id", x: 8, y: 22 }}, task.id);
+      append(node, "text", {{ class: "dependency-node-icon", x: nodeWidth - 20, y: 23, "text-anchor": "middle", "aria-hidden": "true" }}, statusSymbols[task.status] || "?");
+    }});
+    const lanes = document.querySelector("#kanban-board");
+    laneDefinitions.forEach(lane => {{
+      const column = append(lanes, "section", {{ class: "kanban-lane", "aria-label": lane.name }});
       const laneTasks = tasks.filter(task => task.lane === lane.name);
-      const heading = column.append("header").attr("class", "kanban-lane-header");
-      heading.append("h2").text(lane.name);
-      heading.append("span").attr("class", "kanban-lane-count").text(laneTasks.length);
-      const cards = column.append("div").attr("class", "kanban-lane-cards").selectAll("article").data(laneTasks).join("article").attr("class", task => task.status === "blocked" ? "task-card task-card-blocked" : "task-card");
-      cards.each(function(task) {{
-        const card = d3.select(this);
-        const cardHeader = card.append("div").attr("class", "task-card-header");
-        cardHeader.append("p").attr("class", "task-card-id").text(task.id);
-        const detailButton = cardHeader.append("button").attr("class", "btn btn-circle btn-ghost btn-xs handoff-detail-button task-detail-button")
-          .attr("type", "button")
-          .attr("aria-label", `Show full details for ${{task.id}} task`)
-          .attr("title", `Show full details for ${{task.id}} task`)
-          .on("click", () => openTaskDetails(task));
-        const detailIcon = detailButton.append("svg").attr("class", "handoff-detail-icon")
-          .attr("viewBox", "0 0 24 24").attr("aria-hidden", "true");
-        detailIcon.append("circle").attr("cx", 12).attr("cy", 12).attr("r", 9);
-        detailIcon.append("path").attr("d", "M12 11v5m0-8h.01");
-        card.append("h3").attr("class", "task-card-title").text(task.title);
-        card.append("span").attr("class", "task-card-status").text(task.status.replaceAll("_", " "));
-        if (task.status === "blocked") card.append("span").attr("class", "task-card-alert").text("Human action required");
-        const meta = card.append("dl").attr("class", "task-card-meta");
-        const field = (label, value) => {{
-          const row = meta.append("div").attr("class", "task-card-meta-row");
-          row.append("strong").text(label);
-          row.append("span").text(value);
-        }};
+      const heading = append(column, "header", {{ class: "kanban-lane-header" }});
+      append(heading, "h2", {{}}, lane.name);
+      append(heading, "span", {{ class: "kanban-lane-count" }}, laneTasks.length);
+      const cards = append(column, "div", {{ class: "kanban-lane-cards" }});
+      laneTasks.forEach(task => {{
+        const card = append(cards, "article", {{ class: task.status === "blocked" ? "task-card task-card-blocked" : "task-card" }});
+        const cardHeader = append(card, "div", {{ class: "task-card-header" }});
+        append(cardHeader, "p", {{ class: "task-card-id" }}, task.id);
+        const detailButton = append(cardHeader, "button", {{ class: "btn btn-circle btn-ghost btn-xs handoff-detail-button task-detail-button", type: "button", "aria-label": `Show full details for ${{task.id}} task`, title: `Show full details for ${{task.id}} task` }});
+        detailButton.addEventListener("click", () => openTaskDetails(task));
+        const detailIcon = append(detailButton, "svg", {{ class: "handoff-detail-icon", viewBox: "0 0 24 24", "aria-hidden": "true" }});
+        append(detailIcon, "circle", {{ cx: 12, cy: 12, r: 9 }});
+        append(detailIcon, "path", {{ d: "M12 11v5m0-8h.01" }});
+        append(card, "h3", {{ class: "task-card-title" }}, task.title);
+        append(card, "span", {{ class: "task-card-status" }}, task.status.replaceAll("_", " "));
+        if (task.status === "blocked") append(card, "span", {{ class: "task-card-alert" }}, "Human action required");
+        const meta = append(card, "dl", {{ class: "task-card-meta" }});
+        const field = (label, value) => {{ const row = append(meta, "div", {{ class: "task-card-meta-row" }}); append(row, "strong", {{}}, label); append(row, "span", {{}}, value); }};
         field("Owner", task.owner);
         field("Cycle time", task.cycle_time.label);
         field("Depends", task.depends_on.length ? task.depends_on.join(", ") : "None");
         field("Latest handoff", `${{task.latest_handoff.role}} · ${{task.latest_handoff.outcome}} · ${{task.latest_handoff.timestamp}}`);
-        if (task.latest_handoff.summary) card.append("p").attr("class", "task-card-summary").text(task.latest_handoff.summary);
+        if (task.latest_handoff.summary) append(card, "p", {{ class: "task-card-summary" }}, task.latest_handoff.summary);
       }});
     }});
-    d3.select("#handoff-total").text(`${{handoffs.length}} handoffs`);
-    const handoffEntries = d3.select("#handoff-stack").selectAll("article").data(handoffs).join("article").attr("class", "handoff-entry");
-    handoffEntries.each(function(handoff) {{
-      const entry = d3.select(this);
-      const heading = entry.append("div").attr("class", "handoff-entry-header");
-      const headingCopy = heading.append("div").attr("class", "handoff-entry-heading");
-      headingCopy.append("time").attr("class", "handoff-time").text(handoff.timestamp);
-      headingCopy.append("span").attr("class", "handoff-task").text(`${{handoff.task_id}} · ${{handoff.task_title}}`);
-      const detailButton = heading.append("button").attr("class", "btn btn-circle btn-ghost btn-xs handoff-detail-button")
-        .attr("type", "button")
-        .attr("aria-label", `Show full details for ${{handoff.task_id}} ${{handoff.role}} handoff`)
-        .attr("title", `Show full details for ${{handoff.task_id}} ${{handoff.role}} handoff`)
-        .on("click", () => openHandoffDetails(handoff));
-      const detailIcon = detailButton.append("svg").attr("class", "handoff-detail-icon")
-        .attr("viewBox", "0 0 24 24").attr("aria-hidden", "true");
-      detailIcon.append("circle").attr("cx", 12).attr("cy", 12).attr("r", 9);
-      detailIcon.append("path").attr("d", "M12 11v5m0-8h.01");
-      entry.append("div").attr("class", "handoff-meta").text(`${{handoff.role}} → ${{handoff.recipient || "—"}} · ${{handoff.outcome}}`);
-      if (handoff.summary) entry.append("p").attr("class", "handoff-summary").text(handoff.summary);
+    document.querySelector("#handoff-total").textContent = `${{handoffs.length}} handoffs`;
+    const handoffStack = document.querySelector("#handoff-stack");
+    handoffs.forEach(handoff => {{
+      const entry = append(handoffStack, "article", {{ class: "handoff-entry" }});
+      const heading = append(entry, "div", {{ class: "handoff-entry-header" }});
+      const headingCopy = append(heading, "div", {{ class: "handoff-entry-heading" }});
+      append(headingCopy, "time", {{ class: "handoff-time" }}, handoff.timestamp);
+      append(headingCopy, "span", {{ class: "handoff-task" }}, `${{handoff.task_id}} · ${{handoff.task_title}}`);
+      const detailButton = append(heading, "button", {{ class: "btn btn-circle btn-ghost btn-xs handoff-detail-button", type: "button", "aria-label": `Show full details for ${{handoff.task_id}} ${{handoff.role}} handoff`, title: `Show full details for ${{handoff.task_id}} ${{handoff.role}} handoff` }});
+      detailButton.addEventListener("click", () => openHandoffDetails(handoff));
+      const detailIcon = append(detailButton, "svg", {{ class: "handoff-detail-icon", viewBox: "0 0 24 24", "aria-hidden": "true" }});
+      append(detailIcon, "circle", {{ cx: 12, cy: 12, r: 9 }});
+      append(detailIcon, "path", {{ d: "M12 11v5m0-8h.01" }});
+      append(entry, "div", {{ class: "handoff-meta" }}, `${{handoff.role}} → ${{handoff.recipient || "—"}} · ${{handoff.outcome}}`);
+      if (handoff.summary) append(entry, "p", {{ class: "handoff-summary" }}, handoff.summary);
     }});
     const drawerBackdrop = document.querySelector("#handoff-drawer-backdrop");
     const drawer = document.querySelector("#handoff-drawer");
