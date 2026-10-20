@@ -16,6 +16,9 @@ describes the project layout and principles.
 ## Working in this repository
 
 - Read the relevant skill and supporting files before changing them.
+- When changing a skill, increment its `VERSION` using SemVer. Pull requests
+  that change skill files must include that bump; GitHub enforces this with
+  the `validate-version-bumps` status check.
 - Keep each skill self-contained, easy to copy, and clear about its trigger,
   workflow, requirements, and limitations.
 - Prefer ordinary Markdown and existing platform capabilities. Do not add a

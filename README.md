@@ -15,6 +15,10 @@
 <p align="center">
   <a href="skills/">Skills</a>
   ·
+  <a href="https://github.com/inotives/trinary-agents/releases">Download releases</a>
+  ·
+  <a href="docs/skill-releases.md">Release and versioning policy</a>
+  ·
   <a href="LICENSE.md">MIT License</a>
 </p>
 
@@ -52,13 +56,18 @@ Each skill lives in its own directory and can be copied independently:
 skills/
 └── <skill-name>/
     ├── SKILL.md          # purpose, trigger, workflow, requirements, limits
+    ├── VERSION           # independent SemVer version for this skill
+    ├── assets/           # optional bundled resources
     ├── scripts/          # optional supporting tools
     └── tests/            # optional checks for supporting tools
 ```
 
 `SKILL.md` is the source of truth for each skill. Add scripts and tests only
 when a skill needs them; keep the core instructions portable and document any
-runtime assumptions at the skill that introduces them.
+runtime assumptions at the skill that introduces them. Each skill is released
+and versioned independently. When a pull request changes a skill, increment
+that skill's `VERSION`; GitHub checks this before allowing the merge. See the
+[release policy](docs/skill-releases.md).
 
 ## Skills
 
@@ -66,6 +75,10 @@ runtime assumptions at the skill that introduces them.
 | --- | --- |
 | [Trinary Agents](skills/trinary-agents/SKILL.md) | Plan feature work, track dependencies, coordinate implementation and independent review, and preserve decisions in Markdown handoffs. |
 | [Trinary Workspace Backup](skills/trinary-workspace-backup/SKILL.md) | Back up, verify, and restore `trinary-workspace/` through a connected Google Drive integration. |
+
+Download the latest ZIP releases from the
+[GitHub Releases](https://github.com/inotives/trinary-agents/releases) page.
+Each release ZIP contains the skill folder at its root.
 
 To install Trinary Agents in your project, run one of these from the project
 root:
@@ -77,6 +90,10 @@ npx skills add inotives/trinary-agents --skill trinary-agents --agent codex
 # Claude Code (installs to .claude/skills/trinary-agents/)
 npx skills add inotives/trinary-agents --skill trinary-agents --agent claude-code
 ```
+
+For the Claude app (not Claude Code), download the skill ZIP from GitHub
+Releases and upload it from **Customize → Skills**. See Anthropic's guide to
+[using skills in Claude](https://support.claude.com/en/articles/12512180-use-skills).
 
 Claude Code runs the worker and reviewer as separate sub-agents through its
 `Agent` tool, which satisfies the independent review gate.
@@ -91,16 +108,22 @@ handoff activity. Task READMEs remain the source of truth. Each task card has a
 top-right details button that opens the full task README in the same sidebar
 used for handoff details.
 Dashboard generation requires Python 3 and uses only the standard library; no
-Python packages need to be installed. On macOS, check with `python3 --version`.
-If the command is unavailable, install Python 3 using the macOS installer from
-[python.org](https://www.python.org/downloads/macos/), then open a new terminal
-and verify the command again. The skill bundles DaisyUI 5.7.50 and embeds its
-stylesheet in each generated dashboard. The page uses browser-native DOM and
-SVG APIs and makes no third-party runtime requests.
+Python packages need to be installed. Check availability with
+`python3 --version`. The skill bundles its DaisyUI stylesheet and embeds it in
+each generated dashboard. The page uses browser-native DOM and SVG APIs and
+makes no third-party runtime requests. See the skill's
+[`SKILL.md`](skills/trinary-agents/SKILL.md) for setup and generation details.
 
 ## Trinary Agents UI Dashboard
 
 ![Trinary Agents task dashboard showing completion, dependency map, task lanes, and handoff activity](assets/trinary-agents-dashboard-ui.png)
+
+When a feature is complete, its latest `dashboard.html` can serve as a
+self-contained report to share or archive. It shows task outcomes and
+implementation/review summaries, plus a timestamped timeline of every handoff
+with its role, recipient, outcome, and summary. The dashboard refreshes as task
+statuses and handoffs change, so the final version reflects the completed
+workflow. The task READMEs and handoff files remain the full, canonical record.
 
 ## Optional Supporting Skills and Tools
 
@@ -131,7 +154,9 @@ skill and ask the human how to proceed.
 
 The Trinary Agents workflow stores feature plans, task briefs, and handoffs in
 a `trinary-workspace/` directory at the target project's repository root. The
-skill's `SKILL.md` defines its structure and rules.
+skill's `SKILL.md` defines its structure and rules. Workspace records are
+project data and are not included in this repository; the directory is ignored
+by this repo's `.gitignore`.
 
 ## Development Principles
 
