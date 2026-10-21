@@ -59,7 +59,7 @@ The feature folder's `README.md` is the implementation plan; do not create a sec
 - A task breakdown section that will link to each task README and list dependencies.
 - A final human acceptance section for evidence and the human's explicit decision.
 
-Set plan status to `Draft` while interviewing and drafting. Present the IP, including the discussion captured in its README, for human review. Do not create task folders or dispatch implementation work until the human explicitly approves the plan. Record the approval and set status to `Approved`, then commit the approved feature plan on the feature branch before creating task folders. Commit only this feature plan; do not include unrelated work. If the plan cannot be cleanly isolated into a commit, pause and ask the human how to proceed. If an approved plan changes materially, explain the change and get approval again before affected work continues, then commit the approved plan change before continuing.
+Set plan status to `Draft` while interviewing and drafting. Present the IP, including the discussion captured in its README, for human review. Do not create task folders or dispatch implementation work until the human explicitly approves the plan. Record the approval and set status to `Approved`, then proceed directly to task decomposition; a separate task-breakdown approval is not required. If the approved plan changes materially, explain the change and get approval again before affected work continues. Commit the plan and initial task breakdown together after decomposition, as described in the next step.
 
 ### 3. Decompose the approved plan into tasks
 
@@ -126,11 +126,11 @@ The `depends_on` frontmatter is the machine-readable source for dependency check
 
 Represent dependencies as a directed acyclic graph within this feature. Validate that every dependency names an existing task, no task depends on itself, and there are no cycles. Show the task list and dependency order to the human. A dependency change after work starts pauses dispatch until the revised plan is approved.
 
-A task becomes `ready` only when the plan and task breakdown are approved and every dependency is `done`.
+A task becomes `ready` when the feature plan is approved and every dependency is `done`.
 
-Before setting the first task to `ready`, show the human the numbered task breakdown and dependency order and get approval. Record the approval in the feature README. If the human requests a change, revise the plan/task graph and revalidate dependencies before dispatch.
+Show the human the numbered task breakdown and dependency order for visibility; do not ask for a separate approval. If decomposition reveals a material change to the approved scope or acceptance criteria, revise the feature plan and get approval for that change before dispatch. Otherwise, the project-manager owns task decomposition and dependency validation.
 
-After the human approves the task breakdown, set tasks with no dependencies to `ready` and regenerate the dashboard if applicable. Before dispatching the first task, create a Git commit on the feature branch containing the approved feature plan, task breakdown, initial task statuses, and generated dashboard when applicable. Do not include unrelated work. Record this baseline commit SHA in the first task's project-manager dispatch handoff. If these workflow records cannot be cleanly isolated into a commit, pause and ask the human how to proceed.
+After validating the task graph, set tasks with no dependencies to `ready` and regenerate the dashboard if applicable. Before dispatching the first task, create one baseline Git commit on the feature branch containing the approved feature plan, task breakdown, initial task statuses, and generated dashboard when applicable. Do not include unrelated work. Record this baseline commit SHA in the first task's project-manager dispatch handoff. If these workflow records cannot be cleanly isolated into a commit, pause and ask the human how to proceed.
 
 ### 4. Dispatch one ready task to a worker
 
@@ -139,13 +139,14 @@ As project-manager, select one `ready` task in dependency order and set it to `i
 - The task README and its acceptance criteria.
 - The feature README sections that define the relevant scope and constraints.
 - Relevant dependency handoffs and implementation context.
-- The requirement to work on the feature branch, run appropriate checks, and write a worker handoff in this task's `handoffs/` folder.
+- The requirement to work on the feature branch and run appropriate checks.
+- The exact canonical handoff filename and full worker handoff template. Ask the worker to return the completed handoff content; the project-manager saves it to that path.
 
-The worker investigates the assigned area before editing. Use available code search or indexing capabilities when useful; otherwise use the repository's ordinary search and file-reading tools. Follow applicable repository instructions and inspect callers, tests, fixtures, and configuration affected by the change. Implement only the assigned task in the target project's files and do not change task status. The task brief may explicitly place an exercise artifact in its task folder; follow that scoped instruction. The worker handoff records the task ID, role, timestamp, summary, changed files, checks actually run and their results, unresolved concerns, and the next action. Never claim a check was run unless there is evidence it was run.
+The worker investigates the assigned area before editing. Use available code search or indexing capabilities when useful; otherwise use the repository's ordinary search and file-reading tools. Follow applicable repository instructions and inspect callers, tests, fixtures, and configuration affected by the change. Implement only the assigned task in the target project's files and do not change task status. The task brief may explicitly place an exercise artifact in its task folder; follow that scoped instruction. The returned worker handoff records the task ID, role, timestamp, summary, changed files, checks actually run and their results, unresolved concerns, and the next action. Never claim a check was run unless there is evidence it was run.
 
 ### 5. Send the worker handoff to an independent reviewer
 
-Read the worker handoff, set the task to `review`, then start a reviewer subagent that has not implemented the task. Give the reviewer the worker handoff, task README, relevant feature acceptance criteria, and the implementation diff or code context. Ask it to check correctness, scope, acceptance criteria, and regressions, then write a reviewer handoff in the same task's `handoffs/` folder.
+Read and persist the worker handoff, set the task to `review`, then start a reviewer subagent that has not implemented the task. Give the reviewer the worker handoff, task README, relevant feature acceptance criteria, implementation diff or code context, the exact canonical reviewer handoff filename, and the full reviewer handoff template. Ask it to check correctness, scope, acceptance criteria, and regressions, then return the completed reviewer handoff content for the project-manager to persist.
 
 The reviewer handoff starts with exactly one verdict:
 
@@ -195,7 +196,7 @@ The project-manager is the only writer of task `status` values:
 
 | Status | Meaning |
 | --- | --- |
-| `queued` | Plan or task breakdown is not approved, or dependencies remain. |
+| `queued` | The feature plan is not approved, or dependencies remain. |
 | `ready` | Approved and all dependencies are `done`. |
 | `in_progress` | A worker is implementing the task. |
 | `review` | Worker evidence is ready and the project-manager has dispatched review. |

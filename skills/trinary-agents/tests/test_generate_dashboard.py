@@ -4,6 +4,7 @@ import re
 import sys
 import tempfile
 import unittest
+import warnings
 from pathlib import Path
 
 
@@ -450,6 +451,68 @@ class DashboardGenerationTests(unittest.TestCase):
             self.assertEqual(handoff["outcome"], "Handoff")
             self.assertEqual(handoff["timestamp"], "2026-10-18T01:23:45Z")
             self.assertNotIn("Not recorded", json.dumps(handoff))
+
+    def test_legacy_handoff_filename_and_fields_are_included_with_warning(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_feature_root(temp)
+            write_task(root, "T-0001", "Legacy handoff", "in_progress", [])
+            write_handoff_text(
+                root,
+                "T-0001",
+                "worker-summary.md",
+                "# Worker handoff\n\n- Role: worker\n- Timestamp (UTC): 2026-10-18T03:00:00Z\n"
+                "- Recipient: project-manager\n- Decision: Returned legacy record\n\n"
+                "**Summary:** Included from a noncanonical filename.\n",
+            )
+
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                tasks = dashboard.load_tasks(root)
+
+            handoffs = tasks[0]["handoffs"]
+            self.assertEqual(len(handoffs), 1)
+            self.assertEqual(handoffs[0]["outcome"], "Returned legacy record")
+            self.assertEqual(handoffs[0]["summary"], "Included from a noncanonical filename.")
+            self.assertTrue(any("worker-summary.md" in str(item.message) for item in caught))
+            page = dashboard.render_html(tasks, generated_at="2026-10-18T04:00:00Z")
+            embedded = json.loads(re.search(r"const handoffs = (\[.*?\]);", page).group(1))
+            self.assertEqual(embedded[0]["filename"], "worker-summary.md")
+            self.assertEqual(embedded[0]["summary"], "Included from a noncanonical filename.")
+
+    def test_unreadable_and_unrecognized_handoffs_are_reported(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_feature_root(temp)
+            write_task(root, "T-0001", "Mixed handoffs", "in_progress", [])
+            handoffs_dir = root / "tasks" / "T-0001--task-0001" / "handoffs"
+            handoffs_dir.mkdir()
+            (handoffs_dir / "20261018_010000--worker-handoff-1.md").write_bytes(b"\xff")
+            write_handoff_text(
+                root,
+                "T-0001",
+                "20261018_020000--reviewer-handoff-1.md",
+                "# Unrecognized record\n\nNo metadata fields here.\n",
+            )
+            write_handoff(
+                root,
+                "T-0001",
+                "20261018_030000--project-manager-handoff-1.md",
+                "project-manager",
+                "worker",
+                "dispatched",
+                "2026-10-18T03:00:00Z",
+            )
+
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                tasks = dashboard.load_tasks(root)
+
+            messages = [str(item.message) for item in caught]
+            self.assertTrue(any("Unable to read handoff file" in message for message in messages))
+            self.assertTrue(any("Unrecognized handoff content" in message for message in messages))
+            page = dashboard.render_html(tasks, generated_at="2026-10-18T04:00:00Z")
+            embedded = json.loads(re.search(r"const handoffs = (\[.*?\]);", page).group(1))
+            self.assertEqual(len(embedded), 2)
+            self.assertNotIn("20261018_010000--worker-handoff-1.md", [item["filename"] for item in embedded])
 
     def test_kanban_routes_each_status_once_and_keeps_handoff_timeline(self):
         with tempfile.TemporaryDirectory() as temp:
