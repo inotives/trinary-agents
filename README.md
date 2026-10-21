@@ -102,6 +102,11 @@ Claude Code runs the worker and reviewer as separate sub-agents through its
 
 ![Trinary Agents workflow from human-approved plan through project manager, worker, independent reviewer, Markdown task records, and the optional monitoring dashboard](assets/trinary-agents-workflow.svg)
 
+The human approves the feature plan once. The project manager then breaks it
+into dependency-aware tasks, validates the task graph, commits the plan and task
+baseline, and dispatches ready work. There is no separate approval for the task
+breakdown; material changes to the approved scope still need human approval.
+
 For any feature with one or more valid task READMEs, the skill generates a
 read-only dashboard for monitoring task status, dependencies, progress, and
 handoff activity. Task READMEs remain the source of truth. Each task card has a
@@ -121,9 +126,9 @@ makes no third-party runtime requests. See the skill's
 When a feature is complete, its latest `dashboard.html` can serve as a
 self-contained report to share or archive. It shows task outcomes and
 implementation/review summaries, plus a timestamped timeline of every handoff
-with its role, recipient, outcome, and summary. The dashboard refreshes as task
-statuses and handoffs change, so the final version reflects the completed
-workflow. The task READMEs and handoff files remain the full, canonical record.
+with its role, recipient, outcome, and summary. Regenerate the dashboard after
+task status or dependency changes and after adding or changing a timestamped
+handoff. The task READMEs and handoff files remain the full, canonical record.
 
 ## Optional Supporting Skills and Tools
 
