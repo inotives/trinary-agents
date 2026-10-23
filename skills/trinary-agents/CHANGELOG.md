@@ -4,6 +4,32 @@ All notable changes to the `trinary-agents` skill. Versions follow
 [Semantic Versioning](https://semver.org/); each release's section is used as
 its GitHub Release notes.
 
+## 1.1.1
+
+### Added
+
+- Backlog items have a `type` of `idea` or `bug`. Bug items record
+  reproduction steps and expected versus actual behavior, and backlog reviews
+  show each item's type.
+- Promoted bugs use a narrower plan interview, may be a single-task IP, and
+  must include an acceptance check that fails before the fix and passes after
+  it. Bug-fix branches default to `fix/<slug>`.
+- Guidance on when a bug is a backlog item versus a reviewer finding or a
+  blocker.
+- The dashboard generator warns when a task's `feature` does not match its
+  feature README `id`.
+
+### Changed
+
+- The backlog item template's `Idea` section is now `Description`.
+- Creating `backlog/` adds a mention of it to an existing workspace README
+  that does not describe the backlog.
+
+### Fixed
+
+- `partial` worker outcomes are limited to two redispatches per task before
+  the blocker process, so the loop cannot repeat indefinitely.
+
 ## 1.1.0
 
 ### Added

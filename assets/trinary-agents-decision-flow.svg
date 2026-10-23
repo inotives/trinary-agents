@@ -40,7 +40,7 @@
 <text x="820" y="294" class="body" text-anchor="start">the affected task is set to blocked</text>
 <rect x="40" y="112" width="250" height="118" rx="14" fill="#1A2031" stroke="#A99BFF" stroke-width="1.5" stroke-dasharray="6 4"/>
 <text x="165.0" y="138" class="card-title" text-anchor="middle">Backlog</text>
-<text x="165.0" y="162" class="small" text-anchor="middle">BL-XXXX items: open → discussing</text>
+<text x="165.0" y="162" class="small" text-anchor="middle">ideas &amp; bugs: open → discussing</text>
 <text x="165.0" y="180" class="small" text-anchor="middle">fed by follow-ups and</text>
 <text x="165.0" y="196" class="small" text-anchor="middle">acceptance limitations</text>
 <text x="165.0" y="216" class="edge-warm" text-anchor="middle">human picks one to promote</text>
@@ -109,7 +109,7 @@
 <path d="M390 1255 L520 1209 L650 1255 L520 1301 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
 <text x="520" y="1260" class="decision" text-anchor="middle">Worker outcome?</text>
 <path d="M390 1255 L330 1255 L330 1135 L355.0 1135" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
-<text x="320" y="1247" class="edge" text-anchor="end">partial · in scope</text>
+<text x="320" y="1247" class="edge" text-anchor="end">partial · in scope (≤ 2)</text>
 <path d="M650 1255 L805 1255" fill="none" stroke="#FFBF69" stroke-width="1.8" marker-end="url(#arrow-warm)"/>
 <circle cx="820" cy="1255" r="15" fill="#3A2D17" stroke="#FFBF69" stroke-width="1.5"/>
 <text x="820" y="1260" class="connector" text-anchor="middle">H</text>
