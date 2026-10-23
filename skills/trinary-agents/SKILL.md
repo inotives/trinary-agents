@@ -1,6 +1,6 @@
 ---
 name: trinary-agents
-description: Plan and deliver a feature through a project-manager, worker, and reviewer workflow with dependency-tracked tasks and durable Markdown handoffs in a project-root trinary-workspace/. Use when coordinating multi-task feature work across subagents, when asked to plan a feature and break it into reviewed tasks, run a PM/worker/reviewer loop, capture or discuss backlog ideas for the next feature, or resume an existing trinary-workspace feature.
+description: Plan and deliver a feature through a project-manager, worker, and reviewer workflow with dependency-tracked tasks and durable Markdown handoffs in a project-root trinary-workspace/. Use when coordinating multi-task feature work across subagents, when asked to plan a feature and break it into reviewed tasks, run a PM/worker/reviewer loop, capture or discuss backlog ideas and bugs for the next feature, or resume an existing trinary-workspace feature.
 ---
 
 # Trinary Agents
@@ -25,13 +25,13 @@ Run a feature as a human-approved implementation plan, a dependency-aware task g
 
 Inspect the repository root, current branch, worktree, and existing branch naming convention. Start a dedicated branch for the feature before creating its plan. If the current branch already is the intended feature branch, continue there. If existing changes make branch ownership unclear, preserve them and ask the human how to proceed; do not stash, reset, discard, or silently move unrelated work.
 
-Use the repository's branch naming convention. If none exists, use a descriptive branch such as `feat/<feature-title-slug>`. Do not create a branch name already in use; inspect and resolve that case with the human.
+Use the repository's branch naming convention. If none exists, use a descriptive branch such as `feat/<feature-title-slug>`, or `fix/<feature-title-slug>` when the feature fixes a bug. Do not create a branch name already in use; inspect and resolve that case with the human.
 
 ### 2. Interview the human and create and approve the feature plan
 
 Inspect `<project-root>/trinary-workspace/` before writing. Create its `README.md` if absent to explain that it stores the backlog, feature plans, tasks, and handoffs for this project. Record the display name as `Project name: <name>`; if the project's name cannot be identified confidently, ask the human to provide it and store their answer. Create `features/` as needed.
 
-If the feature starts from a backlog item, read that item first and seed the decision tree with its idea, context, discussion, and open questions; do not re-ask what it already settles. Record the item as the plan's origin and promote it as described in [Backlog](#backlog).
+If the feature starts from a backlog item, read that item first and seed the decision tree with its description, reproduction (for bugs), context, discussion, and open questions; do not re-ask what it already settles. Record the item as the plan's origin and promote it as described in [Backlog](#backlog).
 
 Before drafting an approval-ready IP or task breakdown, interview the human until the feature request is decision-complete. Build a working decision tree: record the choices that shape the feature and note which choices depend on earlier answers. The current frontier is the set of material decisions whose prerequisites are settled.
 
@@ -135,7 +135,7 @@ For features with one or more valid tasks, generate a feature-local, read-only `
 
 - Regenerate after creating or changing any task's `status` or `depends_on`, and after adding a handoff.
 - If generation reports that the workspace has no usable project name, ask the human for one, record it in `trinary-workspace/README.md` as `Project name: <name>`, and rerun; do not guess.
-- If generation fails on task validation (unknown status, missing field, unknown dependency, or cycle), fix the task records before continuing the workflow.
+- If generation fails on task validation (unknown status, missing field, unknown dependency, or cycle), or warns that a task's `feature` does not match the IP, fix the task records before continuing the workflow.
 - If an existing `dashboard.html` lacks the generator's marker, the generator refuses to overwrite it; preserve the file and tell the human.
 - If Python 3 is unavailable, tell the human and continue without the dashboard. Task READMEs remain canonical; the workflow never depends on the dashboard.
 
@@ -206,7 +206,7 @@ The worker investigates the assigned area before editing. Use available code sea
 Read and persist the worker handoff, then act on its `Outcome`:
 
 - `completed`: continue with review below.
-- `partial`: if the remaining work is within the task's scope, send the worker back with the gaps while the task stays `in_progress`; this does not count as a review rework round. If the task cannot be completed as briefed, it needs a plan change: follow the blocker process in step 6 to get the human's decision.
+- `partial`: if the remaining work is within the task's scope, send the worker back with the gaps while the task stays `in_progress`; this does not count as a review rework round. Allow up to two partial redispatches per task; if the worker still returns `partial`, follow the blocker process in step 6. If the task cannot be completed as briefed, it needs a plan change: follow the blocker process in step 6 to get the human's decision.
 - `blocked`: if the project-manager can resolve the impediment from the repository or approved plan, record the resolution in a project-manager handoff and redispatch. Otherwise follow the blocker process in step 6.
 
 For a `completed` outcome, set the task to `review`, then start a reviewer subagent that has not implemented the task. Give the reviewer the worker handoff, task README, relevant feature acceptance criteria, implementation diff or code context, the exact canonical reviewer handoff filename, and the full reviewer handoff template. Ask it to check correctness, scope, acceptance criteria, and regressions, then return the completed reviewer handoff content for the project-manager to persist. The reviewer treats the worker's "Checks run" as claims: it runs the checks that prove the acceptance criteria itself where practical and records which checks it ran versus which it relied on from the worker.
@@ -223,7 +223,7 @@ or:
 VERDICT: CHANGES_REQUESTED
 ```
 
-It includes evidence for the verdict and concrete findings. Changes required for this task are findings; only out-of-scope ideas go in `Follow-ups`. The reviewer reports the result but does not change task status.
+It includes evidence for the verdict and concrete findings. Changes required for this task are findings; only out-of-scope ideas and bugs go in `Follow-ups`. The reviewer reports the result but does not change task status.
 
 ### 6. Process review and change requests
 
@@ -255,33 +255,37 @@ Only after the human explicitly accepts the result, record that decision and set
 
 ## Backlog
 
-The backlog holds ideas and follow-ups that are not part of any approved feature yet, and the discussion that shapes them into the next IP. It lives in `trinary-workspace/backlog/`, one file per item:
+The backlog holds ideas, bugs, and follow-ups that are not part of any approved feature yet, and the discussion that shapes them into the next IP. It lives in `trinary-workspace/backlog/`, one file per item:
 
 ```text
-trinary-workspace/backlog/BL-XXXX--<idea-title-slug>.md
+trinary-workspace/backlog/BL-XXXX--<item-title-slug>.md
 ```
 
-Choose the next unused four-digit number by inspecting `backlog/BL-*.md`. Only the project-manager writes backlog files and their `status`; workers and reviewers propose items in their handoffs' `Follow-ups` section.
+Choose the next unused four-digit number by inspecting `backlog/BL-*.md`. When creating `backlog/`, add a mention of it to the workspace README if the README does not already describe the backlog. Each item has a `type`: `idea` for new behavior or improvements, or `bug` for a defect in existing behavior.
+
+A bug belongs in the backlog only when it is outside the current work. A bug inside the current task's scope is a reviewer finding, and a bug that stops the current feature is a blocker; neither becomes a backlog item. Only the project-manager writes backlog files and their `status`; workers and reviewers propose items in their handoffs' `Follow-ups` section.
 
 ### Capture
 
 Create an item when:
 
-- The human asks to record an idea.
+- The human asks to record an idea or report a bug.
 - A worker or reviewer handoff lists a follow-up. Capture each one when persisting the handoff, link the handoff as the source, and tell the human which items were added.
 - Feature acceptance finds a limitation that warrants later work.
 
-Before creating an item, check `open` and `discussing` items for the same idea; append to an existing item instead of creating a duplicate. A follow-up never changes the current task's scope or acceptance criteria.
+Before creating an item, check `open` and `discussing` items for the same idea or bug; append to an existing item instead of creating a duplicate. A follow-up never changes the current task's scope or acceptance criteria.
 
 Commit backlog changes, including discussion and status updates, with the next workflow checkpoint on the current branch. If no feature branch is active, ask the human which branch to commit them on. Items committed on an unmerged feature branch are not visible from other branches until it merges.
 
 ### Discuss
 
-When the human wants to review the backlog or shape an idea, list `open` and `discussing` items with their IDs, titles, and sources, and let the human choose. Set the chosen item to `discussing` and append each discussion round to its `Discussion` section with a UTC date. Preserve the human's input as a quote, or label it as a paraphrase. Keep this lightweight: record the problem, motivation, rough scope, and open questions. The decision-complete interview happens in step 2 once the item is promoted.
+When the human wants to review the backlog or shape an item, list `open` and `discussing` items with their IDs, types, titles, and sources, and let the human choose. Set the chosen item to `discussing` and append each discussion round to its `Discussion` section with a UTC date. Preserve the human's input as a quote, or label it as a paraphrase. Keep this lightweight: record the problem, motivation, rough scope, and open questions. The decision-complete interview happens in step 2 once the item is promoted.
 
 ### Promote or drop
 
 Promote an item only when the human explicitly chooses it for the next feature. Start the workflow at step 1; the new feature branch must be based on a branch that contains the item. If the item exists only on another unmerged branch, ask the human whether to merge that branch first or to base the new branch on it. Then run step 2 from the item, set the new IP's `origin` to the item's ID, and set the item's `status` to `promoted` with `promoted_to` naming the IP. From then on the feature README is canonical; do not continue the discussion in the backlog item.
+
+A promoted `bug` follows the same workflow with a narrower interview: confirm the reproduction steps, expected and actual behavior, impact, and the fix's boundaries. A small fix may be a single-task IP. Its acceptance checks must include a test or check that fails before the fix and passes after it.
 
 When the human decides not to pursue an item, set it to `dropped` and append the dated reason. Never delete backlog items.
 
@@ -297,18 +301,27 @@ When the human decides not to pursue an item, set it to `dropped` and append the
 ```markdown
 ---
 id: BL-0001
-title: Example idea
+title: Example item
+type: idea
 status: open
 created_at: 2026-01-01T00:00:00Z
 source: human request
 promoted_to: null
 ---
 
-# BL-0001: Example idea
+# BL-0001: Example item
 
-## Idea
+## Description
 
-Describe the problem or opportunity in a few sentences.
+Describe the problem, opportunity, or defect in a few sentences.
+
+## Reproduction
+
+For `type: bug` only; remove this section for ideas.
+
+- Steps to reproduce: [numbered steps, with environment or version]
+- Expected: [what should happen]
+- Actual: [what happens, with error output if any]
 
 ## Context and evidence
 
@@ -423,7 +436,7 @@ For a blocker, use `Event: blocker escalation`. State the decision or action req
 
 ## Follow-ups
 
-- [Out-of-scope improvement or idea for later, with evidence, or `None`]
+- [Out-of-scope improvement, idea, or existing bug for later, with evidence, or `None`]
 
 ## Next action
 
@@ -463,7 +476,7 @@ VERDICT: CHANGES_REQUESTED
 
 ## Follow-ups
 
-- [Out-of-scope improvement or risk worth a later feature, with evidence, or `None`. Do not put required changes for this task here; they are findings.]
+- [Out-of-scope improvement, risk, or existing bug worth a later feature, with evidence, or `None`. Do not put required changes for this task here; they are findings.]
 
 ## Next action
 

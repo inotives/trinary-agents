@@ -692,6 +692,26 @@ class DashboardGenerationTests(unittest.TestCase):
         self.assertNotIn("D3 7.9.0", page)
         self.assertNotIn("<script src=", page)
 
+    def test_task_feature_mismatch_warns(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_feature_root(temp, feature_id="IP-0002")
+            write_task(root, "T-0001", "Copied task", "ready", [])
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                dashboard.generate(root)
+            messages = [str(item.message) for item in caught]
+            self.assertIn("T-0001: feature 'IP-0001' does not match IP-0002", messages)
+            self.assertTrue((root / "dashboard.html").exists())
+
+    def test_matching_task_feature_does_not_warn(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_feature_root(temp)
+            write_task(root, "T-0001", "Own task", "ready", [])
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                dashboard.generate(root)
+            self.assertFalse([item for item in caught if "does not match" in str(item.message)])
+
     def test_unknown_task_status_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
             root = make_feature_root(temp)

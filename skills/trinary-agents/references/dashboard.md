@@ -26,7 +26,8 @@ SVG APIs; the page makes no third-party runtime requests.
 - Tasks: every `tasks/T-*/README.md` frontmatter (`id`, `title`, `status`,
   `depends_on`). Generation fails on missing fields, duplicate IDs, unknown
   dependencies, dependency cycles, or a status not listed in the SKILL.md
-  status table.
+  status table. A task whose `feature` does not match the feature README's `id`
+  produces a warning.
 - Activity: timestamped handoff files in each task's `handoffs/` folder. The
   latest handoff per task supplies its activity and recipient. Noncanonical
   filenames produce a warning.

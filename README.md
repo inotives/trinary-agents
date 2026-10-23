@@ -122,9 +122,10 @@ one into the next feature plan.
 
 ### Backlog
 
-The backlog holds ideas that are not part of an approved feature yet. Each item
-is one Markdown file in `trinary-workspace/backlog/BL-XXXX--<idea-slug>.md`;
-the template and rules are in the skill's `SKILL.md`.
+The backlog holds ideas and bugs that are not part of an approved feature yet.
+Each item is one Markdown file in
+`trinary-workspace/backlog/BL-XXXX--<item-slug>.md` with a `type` of `idea` or
+`bug`; the template and rules are in the skill's `SKILL.md`.
 
 - **Capture.** Items come from the human ("add this to the backlog"), from
   `Follow-ups` in worker and reviewer handoffs, and from limitations found
@@ -139,6 +140,13 @@ the template and rules are in the skill's `SKILL.md`.
   plan interview, records the item as the plan's `origin`, and marks the item
   `promoted`. Items the human rejects are marked `dropped` with the reason.
   Items are never deleted.
+- **Bugs.** A bug goes to the backlog only when it is outside the current
+  work: a bug in the task under review is a reviewer finding, and one that
+  stops the feature is a blocker. A bug item records reproduction steps and
+  expected versus actual behavior. When promoted, the plan interview focuses
+  on reproduction and impact, a small fix can be a single-task plan on a
+  `fix/` branch, and acceptance must include a check that fails before the
+  fix and passes after it.
 
 Backlog changes are committed with the next workflow checkpoint on the current
 branch, so items captured on an unmerged feature branch only appear on other
@@ -198,7 +206,7 @@ skill and ask the human how to proceed.
 
 The Trinary Agents workflow stores its backlog, feature plans, task briefs, and
 handoffs in a `trinary-workspace/` directory at the target project's repository
-root. Backlog items capture ideas and review follow-ups, hold the discussion
+root. Backlog items capture ideas, bugs, and review follow-ups, hold the discussion
 that shapes them, and are promoted into a new feature plan when the human
 chooses one. The
 skill's `SKILL.md` defines its structure and rules. Workspace records are
