@@ -17,40 +17,19 @@ HANDOFF_FIELD = re.compile(
     r"(?::\*\*|\*\*:|:)\s*(.*?)\s*(?:\*\*)?\s*$",
     re.I,
 )
+STATUSES = ("queued", "ready", "in_progress", "review", "changes_requested", "blocked", "done")
 HANDOFF_VERDICT = re.compile(r"^\s*(?:-\s*)?(?:\*\*)?VERDICT\s*:\s*(.*?)\s*(?:\*\*)?\s*$", re.I)
 DASHBOARD_ASSETS = Path(__file__).resolve().parent.parent / "assets" / "dashboard"
 
 
 def read_dashboard_assets():
-    files = {
-        "daisyui_css": "daisyui-5.7.50.css",
-        "tailwind_browser_js": "tailwind-browser-4.3.3.js",
-        "d3_js": "d3-7.9.0.min.js",
-    }
-    assets = {key: (DASHBOARD_ASSETS / name).read_text(encoding="utf-8") for key, name in files.items()}
-    if "</style" in assets["daisyui_css"].lower():
+    daisyui_css = (DASHBOARD_ASSETS / "daisyui-5.7.50.css").read_text(encoding="utf-8")
+    if "</style" in daisyui_css.lower():
         raise ValueError("DaisyUI asset contains a style-closing sequence")
-    if any("</script" in assets[key].lower() for key in ("tailwind_browser_js", "d3_js")):
-        raise ValueError("dashboard JavaScript asset contains a script-closing sequence")
-
-    licenses = [
-        ("Tailwind CSS Browser 4.3.3 — MIT", "LICENSE-tailwind-browser-MIT.txt"),
-        ("DaisyUI 5.7.50 — MIT", "LICENSE-daisyui-MIT.txt"),
-        ("D3 7.9.0 — ISC", "LICENSE-d3-ISC.txt"),
-        ("D3 Ease 3.0.1 — BSD-3-Clause", "LICENSE-d3-ease-BSD-3-Clause.txt"),
-        ("robust-predicates 3.0.3 — Unlicense", "LICENSE-robust-predicates-Unlicense.txt"),
-        ("Commander 7.2.0 — MIT", "LICENSE-commander-MIT.txt"),
-        ("iconv-lite 0.6.3 — MIT", "LICENSE-iconv-lite-MIT.txt"),
-        ("safer-buffer 2.1.2 — MIT", "LICENSE-safer-buffer-MIT.txt"),
-        ("rw 1.3.3 — BSD-3-Clause", "LICENSE-rw-BSD-3-Clause.txt"),
-    ]
-    assets["license_notices"] = "\n\n".join(
-        f"{name}\n{(DASHBOARD_ASSETS / filename).read_text(encoding='utf-8').strip()}"
-        for name, filename in licenses
-    )
-    if "-->" in assets["license_notices"]:
+    license_notice = (DASHBOARD_ASSETS / "LICENSE-daisyui-MIT.txt").read_text(encoding="utf-8").strip()
+    if "-->" in license_notice:
         raise ValueError("dashboard license notice contains an HTML comment terminator")
-    return assets
+    return {"daisyui_css": daisyui_css, "license_notices": f"DaisyUI 5.7.50 — MIT\n{license_notice}"}
 
 
 def scalar(value):
@@ -94,6 +73,8 @@ def read_task(readme):
     missing = [key for key in ("id", "title", "status", "depends_on") if key not in fields]
     if missing:
         raise ValueError(f"{readme}: missing frontmatter fields: {', '.join(missing)}")
+    if fields["status"] not in STATUSES:
+        raise ValueError(f"{readme}: unknown status {fields['status']!r}; expected one of: {', '.join(STATUSES)}")
     return fields
 
 
@@ -277,14 +258,14 @@ def current_owner(status, handoff):
     if recipient.lower() not in {"", "—", "-", "none", "null", "unknown", "n/a"}:
         aliases = {"project-manager": "Project manager", "reviewer": "Reviewer", "worker": "Worker", "human": "Human"}
         return aliases.get(recipient.lower(), recipient.replace("-", " ").title())
-    fallbacks = {"blocked": "Human", "needs_human": "Human", "waiting_human": "Human", "review": "Reviewer", "in_progress": "Worker"}
+    fallbacks = {"review": "Reviewer", "in_progress": "Worker"}
     return fallbacks.get(status, "Project manager")
 
 
 def kanban_lane(status):
     if status in {"in_progress", "changes_requested"}:
         return "Worker"
-    if status in {"review", "blocked"}:
+    if status == "review":
         return "Reviewer"
     if status == "done":
         return "Done"
@@ -434,7 +415,6 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     handoffs = [handoff for task in tasks for handoff in task.get("handoffs", [])]
     handoffs.sort(key=lambda item: (item["sort_timestamp"], item["sequence"], item["filename"], item["task_id"]), reverse=True)
     handoff_data = html_safe_json(handoffs)
-    daisyui_css = (Path(__file__).resolve().parent.parent / "assets" / "daisyui-5.7.50.css").read_text(encoding="utf-8")
     title = html.escape(f"Trinary-AGENTs Flow :: {project_name}", quote=True)
     subtitle = html.escape(f"{feature_id}--{feature_title} workflow viewer", quote=True)
     return f'''{MARKER}
@@ -444,7 +424,7 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Feature task dashboard</title>
-  <style id="daisyui-styles">{daisyui_css}</style>
+  <style id="daisyui-styles">{assets['daisyui_css']}</style>
   <style>
     :root {{ color-scheme: dark; }}
     html, body {{ width: 100%; height: 100%; margin: 0; }}
@@ -483,7 +463,6 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     .dependency-node-icon {{ fill: var(--status-color); font: 800 15px system-ui, sans-serif; }}
     .dependency-node[data-status="queued"] {{ --status-color: #94a3b8; }}
     .dependency-node[data-status="ready"] {{ --status-color: #22d3ee; }}
-    .dependency-node[data-status="needs_human"], .dependency-node[data-status="waiting_human"] {{ --status-color: #fbbf24; }}
     .dependency-node[data-status="in_progress"] {{ --status-color: #60a5fa; }}
     .dependency-node[data-status="changes_requested"] {{ --status-color: #fb923c; }}
     .dependency-node[data-status="review"] {{ --status-color: #c4b5fd; }}
@@ -494,7 +473,6 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     .dependency-legend-symbol {{ color: var(--status-color); font-size: .75rem; font-weight: 800; }}
     .dependency-legend-item[data-status="queued"] {{ --status-color: #94a3b8; }}
     .dependency-legend-item[data-status="ready"] {{ --status-color: #22d3ee; }}
-    .dependency-legend-item[data-status="needs_human"], .dependency-legend-item[data-status="waiting_human"] {{ --status-color: #fbbf24; }}
     .dependency-legend-item[data-status="in_progress"] {{ --status-color: #60a5fa; }}
     .dependency-legend-item[data-status="changes_requested"] {{ --status-color: #fb923c; }}
     .dependency-legend-item[data-status="review"] {{ --status-color: #c4b5fd; }}
@@ -625,9 +603,9 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
     const dependencyLayout = {dependency_layout};
     const handoffs = {handoff_data};
     const laneDefinitions = [
-      {{ name: "Project manager", statuses: ["queued", "ready", "needs_human", "waiting_human"] }},
+      {{ name: "Project manager", statuses: ["queued", "ready", "blocked"] }},
       {{ name: "Worker", statuses: ["in_progress", "changes_requested"] }},
-      {{ name: "Reviewer", statuses: ["review", "blocked"] }},
+      {{ name: "Reviewer", statuses: ["review"] }},
       {{ name: "Done", statuses: ["done"] }}
     ];
     const completed = tasks.filter(task => task.status === "done").length;
@@ -708,8 +686,8 @@ def render_html(tasks, project_name="Project", feature_id="IP-0001", feature_tit
       const x2 = target.x, y2 = target.y + nodeHeight / 2, bend = (x2 - x1) / 2;
       append(edgeGroup, "path", {{ class: "dependency-edge", "marker-end": "url(#dependency-arrow)", d: `M ${{x1}} ${{y1}} C ${{x1 + bend}} ${{y1}}, ${{x2 - bend}} ${{y2}}, ${{x2}} ${{y2}}` }});
     }});
-    const statusSymbols = {{ queued: "○", ready: "◇", needs_human: "?", waiting_human: "⌛", in_progress: "▶", changes_requested: "↻", review: "◷", blocked: "!", done: "✓" }};
-    const statuses = ["queued", "ready", "needs_human", "waiting_human", "in_progress", "changes_requested", "review", "blocked", "done"];
+    const statusSymbols = {{ queued: "○", ready: "◇", in_progress: "▶", changes_requested: "↻", review: "◷", blocked: "!", done: "✓" }};
+    const statuses = ["queued", "ready", "in_progress", "changes_requested", "review", "blocked", "done"];
     const legend = document.querySelector("#dependency-legend");
     statuses.forEach(status => {{
       const item = append(legend, "span", {{ class: "dependency-legend-item", "data-status": status }});
