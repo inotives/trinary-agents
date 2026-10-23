@@ -1,6 +1,6 @@
 ---
 name: trinary-agents
-description: Plan and deliver a feature through a project-manager, worker, and reviewer workflow with dependency-tracked tasks and durable Markdown handoffs in a project-root trinary-workspace/. Use when coordinating multi-task feature work across subagents.
+description: Plan and deliver a feature through a project-manager, worker, and reviewer workflow with dependency-tracked tasks and durable Markdown handoffs in a project-root trinary-workspace/. Use when coordinating multi-task feature work across subagents, when asked to plan a feature and break it into reviewed tasks, run a PM/worker/reviewer loop, capture or discuss backlog ideas for the next feature, or resume an existing trinary-workspace feature.
 ---
 
 # Trinary Agents
@@ -16,7 +16,7 @@ Run a feature as a human-approved implementation plan, a dependency-aware task g
 - Only the project-manager writes task statuses. Workers and reviewers record outcomes in handoffs.
 - Keep task dependencies within the same feature in v1. Dispatch only one task at a time, even when multiple tasks are ready.
 - Treat `trinary-workspace/` as workflow records. Implementation tasks change the target project's actual source, tests, configuration, and documentation at the paths their briefs identify. A workflow exercise may explicitly ask for its artifact to live inside its task folder.
-- When committing workflow checkpoints, stage only the files that belong to the checkpoint. Leave out OS metadata such as `.DS_Store`; do not add it to the commit or delete it.
+- When committing workflow checkpoints, stage only the files that belong to the checkpoint. Leave out OS metadata such as `.DS_Store`; do not add it to the commit or delete it. Follow the repository's commit message convention; if none exists, use a short imperative subject that names the feature or task ID, such as `IP-0001: approve plan and task breakdown` or `T-0002: add config parser`.
 - Do not merge, push, or declare the feature accepted unless the human explicitly authorizes the relevant action.
 
 ## Workflow
@@ -29,7 +29,9 @@ Use the repository's branch naming convention. If none exists, use a descriptive
 
 ### 2. Interview the human and create and approve the feature plan
 
-Inspect `<project-root>/trinary-workspace/` before writing. Create its `README.md` if absent to explain that it stores feature plans, tasks, and handoffs for this project. Record the display name as `Project name: <name>`; if the project's name cannot be identified confidently, ask the human to provide it and store their answer. Create `features/` as needed.
+Inspect `<project-root>/trinary-workspace/` before writing. Create its `README.md` if absent to explain that it stores the backlog, feature plans, tasks, and handoffs for this project. Record the display name as `Project name: <name>`; if the project's name cannot be identified confidently, ask the human to provide it and store their answer. Create `features/` as needed.
+
+If the feature starts from a backlog item, read that item first and seed the decision tree with its idea, context, discussion, and open questions; do not re-ask what it already settles. Record the item as the plan's origin and promote it as described in [Backlog](#backlog).
 
 Before drafting an approval-ready IP or task breakdown, interview the human until the feature request is decision-complete. Build a working decision tree: record the choices that shape the feature and note which choices depend on earlier answers. The current frontier is the set of material decisions whose prerequisites are settled.
 
@@ -49,17 +51,68 @@ Choose the next unused four-digit feature number by inspecting `features/IP-*/`.
 trinary-workspace/features/IP-XXXX--<feature-title-slug>/README.md
 ```
 
-The feature folder's `README.md` is the implementation plan; do not create a second IP document. Include:
+The feature folder's `README.md` is the implementation plan; do not create a second IP document. Write it from this template; keep the section names and frontmatter keys, replace the example values, and write `None` for sections that do not apply yet:
 
-- YAML frontmatter with `id`, `title`, `status`, `branch`, and `created_at` (UTC ISO 8601).
-- Goal, context, scope, and explicit non-goals.
-- Proposed design and relevant decisions/ADRs, with dates and rationale.
-- Acceptance checks that prove the feature works.
-- Human decisions and open questions.
-- A task breakdown section that will link to each task README and list dependencies.
-- A final human acceptance section for evidence and the human's explicit decision.
+```markdown
+---
+id: IP-0001
+title: Example feature
+status: Draft
+branch: feat/example-feature
+created_at: 2026-01-01T00:00:00Z
+origin: null
+---
 
-Set plan status to `Draft` while interviewing and drafting. Present the IP, including the discussion captured in its README, for human review. Do not create task folders or dispatch implementation work until the human explicitly approves the plan. Record the approval and set status to `Approved`, then proceed directly to task decomposition; a separate task-breakdown approval is not required. If the approved plan changes materially, explain the change and get approval again before affected work continues. Commit the plan and initial task breakdown together after decomposition, as described in the next step.
+# IP-0001: Example feature
+
+Origin: [BL-0001](../../backlog/BL-0001--example-idea.md), or `None` when the feature did not start from a backlog item.
+
+## Goal
+
+State the outcome and how success is recognized.
+
+## Context
+
+Summarize the problem, users and workflows, and relevant repository findings.
+
+## Scope
+
+- List what this feature delivers.
+
+## Non-goals
+
+- List explicit exclusions.
+
+## Design and decisions
+
+- [YYYY-MM-DD] Decision, rationale, and who made it. Link any decision record kept in this folder.
+
+## Constraints and dependencies
+
+- Record constraints, integrations, failure cases, and assumptions.
+
+## Acceptance checks
+
+- [ ] State feature-level checks, with commands where possible.
+
+## Open questions
+
+- List unresolved decisions, or write `None`.
+
+## Task breakdown
+
+- Filled in after approval: link each task README and list its dependencies.
+
+## Plan approval
+
+- Record the human's explicit approval and its UTC timestamp.
+
+## Human acceptance
+
+- Record acceptance evidence and the human's explicit decision.
+```
+
+Set plan status to `Draft` while interviewing and drafting. Present the IP, including the discussion captured in its README, for human review. Do not create task folders or dispatch implementation work until the human explicitly approves the plan. Record the approval and set status to `Approved`, then proceed directly to task decomposition; a separate task-breakdown approval is not required. If the approved plan changes materially, explain the change and get approval again before affected work continues; keep the current plan status, record the change in `Design and decisions`, and add the new approval to `Plan approval`. Commit the plan and initial task breakdown together after decomposition, as described in the next step.
 
 ### 3. Decompose the approved plan into tasks
 
@@ -76,11 +129,15 @@ trinary-workspace/features/IP-XXXX--<feature-title>/
 
 Each task `README.md` links to the feature README using a relative path and contains YAML frontmatter with `id`, `feature`, `title`, `status`, and `depends_on`. Also include scope, explicit exclusions where useful, acceptance criteria, relevant implementation context, and links to upstream tasks. Begin with `queued` status. Write every task README from the template later in this step, which fixes the section names; read it before creating the first task.
 
-Dashboard generation requires Python 3 and uses only the standard library; no Python packages need to be installed. Its DaisyUI 5.7.50 stylesheet is bundled with the skill and embedded into each generated dashboard. The dashboard uses browser-native DOM and SVG APIs and makes no third-party runtime requests. Check availability with `python3 --version`. If `python3` is unavailable on macOS, direct the human to install Python 3 using the [official macOS installer](https://www.python.org/downloads/macos/), open a new terminal, and verify with `python3 --version`. Do not modify or remove Apple's system Python. Once Python 3 is available, run the dashboard generator as described below.
+#### Feature dashboard
 
-For features with one or more valid tasks, generate a feature-local `dashboard.html` from the task README frontmatter by running the skill's `scripts/generate_dashboard.py` with the feature folder path. Resolve the script path relative to the directory that contains this `SKILL.md`, not the project root; harnesses install skills in different locations (for example `.claude/skills/trinary-agents/` or `.agents/skills/trinary-agents/`). The generator reads the project display name from `trinary-workspace/README.md` and the feature ID/title from the feature README frontmatter. If the workspace has no usable project name, ask the human to supply one, record it as `Project name: <name>`, and rerun generation; do not guess. The dashboard title is `Trinary-AGENTs Flow :: <Project Name>` and the subtitle is `IP-XXXX--<feature title> workflow viewer`. Regenerate it after creating or changing a task's `status` or `depends_on` fields, including when a review outcome or blocker changes status, and after adding or changing a timestamped handoff. Features with no valid tasks have no dashboard. If `dashboard.html` already exists without the skill's generated marker, preserve it and stop rather than overwrite it. The dashboard is a read-only snapshot: task READMEs remain canonical for status and dependencies; the latest timestamped handoff per task supplies activity and recipient. The task board has four lanes: `queued`, `ready`, and `blocked` go to Project manager; `in_progress` and `changes_requested` go to Worker; `review` goes to Reviewer; and `done` goes to Done. Cards show task ID/title, status, current owner, dependencies, and latest handoff role/outcome/time, with its summary when present. The separate handoff timeline lists every timestamped handoff newest first with its task, role, recipient, outcome, and summary when present. The overview shows a left-to-right dependency map with arrows from prerequisites to dependent tasks, alongside completion progress. Compact nodes show the task ID and a status symbol, with color and symbol explained by a legend; an accessible text equivalent exposes full task IDs, titles, statuses, and prerequisites. The map scrolls within its panel when its width exceeds the available space. Owner is `Completed` for `done` and always `Human` for `blocked`, regardless of handoff recipient; otherwise use a usable latest handoff recipient, falling back to `Human` for `needs_human`/`waiting_human`, `Reviewer` for `review`, `Worker` for `in_progress`, and `Project manager` for other statuses. The feature workflow must work without the dashboard or network access. DaisyUI 5.7.50 styling is embedded locally; rendering uses browser-native DOM and SVG APIs with no third-party runtime assets. The auto-refresh toggle is off by default and has an adjustable 5–60 second interval in five-second steps, defaulting to 10 seconds. The selected interval persists in the URL query parameter while the `#auto-refresh` hash continues to control on/off state, including for `file://` dashboards without session storage. Changing the interval while refresh is enabled restarts its timer. The enabled toggle turns green and animates its icon unless `prefers-reduced-motion` is set. The four lanes and handoff timeline scroll within their panels when content exceeds the available space.
+For features with one or more valid tasks, generate a feature-local, read-only `dashboard.html` by running the skill's `scripts/generate_dashboard.py` with the feature folder path, for example `python3 <skill-dir>/scripts/generate_dashboard.py trinary-workspace/features/IP-0001--example-feature`. Resolve `<skill-dir>` as the directory that contains this `SKILL.md`, not the project root; harnesses install skills in different locations (for example `.claude/skills/trinary-agents/` or `.agents/skills/trinary-agents/`). It requires only Python 3; see [`references/dashboard.md`](references/dashboard.md) for setup help and what the page shows.
 
-Task cycle time is wall-clock time from the earliest project-manager handoff addressed to a worker through the latest approved reviewer handoff for completed tasks; it includes review rounds and human waits. For unfinished dispatched tasks, measure through dashboard generation time. Show each task's duration on its card and the sum of available durations as `Total task cycle time` below completion progress. Do not estimate missing timestamps; use `Not started` when no worker dispatch exists and `Time unavailable` when a required timestamp is missing or invalid. This metric is not active effort or total feature duration.
+- Regenerate after creating or changing any task's `status` or `depends_on`, and after adding a handoff.
+- If generation reports that the workspace has no usable project name, ask the human for one, record it in `trinary-workspace/README.md` as `Project name: <name>`, and rerun; do not guess.
+- If generation fails on task validation (unknown status, missing field, unknown dependency, or cycle), fix the task records before continuing the workflow.
+- If an existing `dashboard.html` lacks the generator's marker, the generator refuses to overwrite it; preserve the file and tell the human.
+- If Python 3 is unavailable, tell the human and continue without the dashboard. Task READMEs remain canonical; the workflow never depends on the dashboard.
 
 Use this structure for every task README; keep the section names and frontmatter keys consistent. Replace the example values and remove optional placeholder bullets that do not apply:
 
@@ -122,7 +179,7 @@ Describe the specific outcome this task owns.
 Append project-manager, worker, reviewer, and human-response records in [`handoffs/`](handoffs/). Do not overwrite earlier handoffs.
 ```
 
-The `depends_on` frontmatter is the machine-readable source for dependency checks; keep the Dependencies section aligned with it. The project-manager updates only `status` as the task moves through the lifecycle. Change scope or acceptance criteria only through an approved plan change, and record the decision in the feature README and a project-manager handoff.
+The `depends_on` frontmatter is the machine-readable source for dependency checks; keep the Dependencies section aligned with it. Once a task has been dispatched, the project-manager updates only its `status` as it moves through the lifecycle. Change a dispatched task's scope, acceptance criteria, or dependencies only through an approved plan change, and record the decision in the feature README and a project-manager handoff.
 
 Represent dependencies as a directed acyclic graph within this feature. Validate that every dependency names an existing task, no task depends on itself, and there are no cycles. Show the task list and dependency order to the human. A dependency change after work starts pauses dispatch until the revised plan is approved.
 
@@ -130,11 +187,11 @@ A task becomes `ready` when the feature plan is approved and every dependency is
 
 Show the human the numbered task breakdown and dependency order for visibility; do not ask for a separate approval. If decomposition reveals a material change to the approved scope or acceptance criteria, revise the feature plan and get approval for that change before dispatch. Otherwise, the project-manager owns task decomposition and dependency validation.
 
-After validating the task graph, set tasks with no dependencies to `ready` and regenerate the dashboard if applicable. Before dispatching the first task, create one baseline Git commit on the feature branch containing the approved feature plan, task breakdown, initial task statuses, and generated dashboard when applicable. Do not include unrelated work. Record this baseline commit SHA in the first task's project-manager dispatch handoff. If these workflow records cannot be cleanly isolated into a commit, pause and ask the human how to proceed.
+After validating the task graph, set tasks with no dependencies to `ready` and regenerate the dashboard if applicable. Before dispatching the first task, create one baseline Git commit on the feature branch containing the approved feature plan, task breakdown, initial task statuses, generated dashboard when applicable, and the promoted backlog item when the feature has an origin. Do not include unrelated work. Record this baseline commit SHA in the first task's project-manager dispatch handoff. If these workflow records cannot be cleanly isolated into a commit, pause and ask the human how to proceed.
 
 ### 4. Dispatch one ready task to a worker
 
-As project-manager, select one `ready` task in dependency order and set it to `in_progress`. Start a worker subagent with:
+As project-manager, select one `ready` task in dependency order and set it to `in_progress`. When this is the feature's first dispatch, also set the feature plan status to `Implementing`. Start a worker subagent with:
 
 - The task README and its acceptance criteria.
 - The feature README sections that define the relevant scope and constraints.
@@ -142,11 +199,17 @@ As project-manager, select one `ready` task in dependency order and set it to `i
 - The requirement to work on the feature branch and run appropriate checks.
 - The exact canonical handoff filename and full worker handoff template. Ask the worker to return the completed handoff content; the project-manager saves it to that path.
 
-The worker investigates the assigned area before editing. Use available code search or indexing capabilities when useful; otherwise use the repository's ordinary search and file-reading tools. Follow applicable repository instructions and inspect callers, tests, fixtures, and configuration affected by the change. Implement only the assigned task in the target project's files and do not change task status. The task brief may explicitly place an exercise artifact in its task folder; follow that scoped instruction. The returned worker handoff records the task ID, role, timestamp, summary, changed files, checks actually run and their results, unresolved concerns, and the next action. Never claim a check was run unless there is evidence it was run.
+The worker investigates the assigned area before editing. Use available code search or indexing capabilities when useful; otherwise use the repository's ordinary search and file-reading tools. Follow applicable repository instructions and inspect callers, tests, fixtures, and configuration affected by the change. Implement only the assigned task in the target project's files and do not change task status. The task brief may explicitly place an exercise artifact in its task folder; follow that scoped instruction. The returned worker handoff records the task ID, role, timestamp, summary, changed files, checks actually run and their results, unresolved concerns, out-of-scope follow-ups, and the next action. Never claim a check was run unless there is evidence it was run.
 
 ### 5. Send the worker handoff to an independent reviewer
 
-Read and persist the worker handoff, set the task to `review`, then start a reviewer subagent that has not implemented the task. Give the reviewer the worker handoff, task README, relevant feature acceptance criteria, implementation diff or code context, the exact canonical reviewer handoff filename, and the full reviewer handoff template. Ask it to check correctness, scope, acceptance criteria, and regressions, then return the completed reviewer handoff content for the project-manager to persist.
+Read and persist the worker handoff, then act on its `Outcome`:
+
+- `completed`: continue with review below.
+- `partial`: if the remaining work is within the task's scope, send the worker back with the gaps while the task stays `in_progress`; this does not count as a review rework round. If the task cannot be completed as briefed, it needs a plan change: follow the blocker process in step 6 to get the human's decision.
+- `blocked`: if the project-manager can resolve the impediment from the repository or approved plan, record the resolution in a project-manager handoff and redispatch. Otherwise follow the blocker process in step 6.
+
+For a `completed` outcome, set the task to `review`, then start a reviewer subagent that has not implemented the task. Give the reviewer the worker handoff, task README, relevant feature acceptance criteria, implementation diff or code context, the exact canonical reviewer handoff filename, and the full reviewer handoff template. Ask it to check correctness, scope, acceptance criteria, and regressions, then return the completed reviewer handoff content for the project-manager to persist. The reviewer treats the worker's "Checks run" as claims: it runs the checks that prove the acceptance criteria itself where practical and records which checks it ran versus which it relied on from the worker.
 
 The reviewer handoff starts with exactly one verdict:
 
@@ -160,15 +223,15 @@ or:
 VERDICT: CHANGES_REQUESTED
 ```
 
-It includes evidence for the verdict and concrete findings or follow-up actions. The reviewer reports the result but does not change task status.
+It includes evidence for the verdict and concrete findings. Changes required for this task are findings; only out-of-scope ideas go in `Follow-ups`. The reviewer reports the result but does not change task status.
 
 ### 6. Process review and change requests
 
 Read the reviewer handoff and act on its verdict:
 
-- For `APPROVED`, set the task to `done`, re-evaluate its dependents, and set newly unblocked tasks to `ready`. Regenerate the feature dashboard if applicable. Before continuing the feature workflow, whether dispatching another task or beginning feature acceptance, commit the reviewed implementation changes and their task workflow updates, including resulting task statuses and the regenerated dashboard, on the feature branch. Commit only changes belonging to this task and its dependency updates; do not include unrelated work. If the task was implemented in a separate worktree or branch, integrate the approved changes into the feature branch and confirm the commit is present there. If the task changes cannot be cleanly isolated into a commit, pause and ask the human how to proceed.
-- For `CHANGES_REQUESTED`, set the task to `changes_requested`, give the worker the findings, then set it to `in_progress` while the worker performs rework. Repeat the worker/reviewer cycle. Allow up to three rework rounds for the task. If the third rework round is still not approved, stop and ask the human how to proceed.
-- When progress requires human intervention to resolve an external impediment, set the task to `blocked` and pause the entire feature workflow. Do not dispatch or continue other tasks while any task is blocked. Write a project-manager handoff that states the blocker, impact, the specific human decision or action needed, and any reasonable options. Route it to the human; do not guess at requirements or silently bypass the blocker. Wait for the human to resolve the question or unblock the task. After each human response, write a new human-response handoff in the same task folder, link it to the project-manager request handoff, and distinguish what the human reported from what the project-manager independently verified. If the response does not resolve the blocker, keep the task `blocked`, record any remaining question in a new project-manager handoff, and wait again. Only after resolution, set the task to the appropriate status (`ready`, `in_progress`, or `queued`), re-evaluate the dependency graph, and resume the loop. Unmet dependencies alone are not a blocker; keep those tasks `queued`.
+- For `APPROVED`, set the task to `done`, re-evaluate its dependents, and set `queued` tasks whose dependencies are now all `done` to `ready`. Regenerate the feature dashboard if applicable. Before continuing the feature workflow, whether dispatching another task or beginning feature acceptance, commit the reviewed implementation changes and their task workflow updates, including resulting task statuses, the regenerated dashboard, and backlog items captured from this task's handoffs, on the feature branch. Commit only changes belonging to this task and its workflow updates; do not include unrelated work. If the task was implemented in a separate worktree or branch, integrate the approved changes into the feature branch and confirm the commit is present there. If the task changes cannot be cleanly isolated into a commit, pause and ask the human how to proceed.
+- For `CHANGES_REQUESTED`, set the task to `changes_requested` and regenerate the dashboard. When dispatching rework, write a project-manager handoff that passes the findings to the worker, set the task to `in_progress`, and regenerate the dashboard again. Repeat the worker/reviewer cycle. Allow up to three rework rounds for the task. If the third rework round is still not approved, follow the blocker process below to ask the human how to proceed.
+- When progress requires a human decision or human action to resolve an impediment, set the task to `blocked` and pause the entire feature workflow. Do not dispatch or continue other tasks while any task is blocked. Write a project-manager handoff that states the blocker, impact, the specific human decision or action needed, and any reasonable options. Route it to the human; do not guess at requirements or silently bypass the blocker. Wait for the human to resolve the question or unblock the task. After each human response, write a new human-response handoff in the same task folder, link it to the project-manager request handoff, and distinguish what the human reported from what the project-manager independently verified. If the response does not resolve the blocker, keep the task `blocked`, record any remaining question in a new project-manager handoff, and wait again. Only after resolution, set the task to the appropriate status (`ready`, `in_progress`, or `queued`), re-evaluate the dependency graph, and resume the loop. Unmet dependencies alone are not a blocker; keep those tasks `queued`.
 
 Use handoffs as append-only evidence; never edit an earlier handoff to change a verdict or outcome.
 
@@ -186,9 +249,90 @@ Never dispatch a task while any task is `blocked`, even if another independent t
 
 ### 7. Run feature acceptance and wait for the human
 
-When every task is `done`, set the feature plan status to `Awaiting Human Acceptance`. Run the feature-level acceptance checks from the feature README and record the actual commands, results, and evidence. Present the evidence and any remaining limitations to the human.
+When every task is `done`, set the feature plan status to `Awaiting Human Acceptance`. Run the feature-level acceptance checks from the feature README and record the actual commands, results, and evidence. Present the evidence and any remaining limitations to the human. Capture limitations that warrant later work as backlog items and list their IDs with the evidence.
 
-Only after the human explicitly accepts the result, record that decision and set the plan status to `Accepted`, then commit the final acceptance record on the feature branch. Commit only the acceptance record; do not include unrelated work. If the acceptance record cannot be cleanly isolated into a commit, pause and ask the human how to proceed. If the human requests changes, update the plan/task records and resume through the same dependency and review gates. Do not merge or push unless separately requested.
+Only after the human explicitly accepts the result, record that decision and set the plan status to `Accepted`, then commit the final acceptance record on the feature branch. Commit only the acceptance record and any backlog items captured during acceptance; do not include unrelated work. If the acceptance record cannot be cleanly isolated into a commit, pause and ask the human how to proceed. If the human requests changes, set the plan status back to `Implementing`, update the plan/task records through an approved plan change, and resume through the same dependency and review gates. Do not merge or push unless separately requested.
+
+## Backlog
+
+The backlog holds ideas and follow-ups that are not part of any approved feature yet, and the discussion that shapes them into the next IP. It lives in `trinary-workspace/backlog/`, one file per item:
+
+```text
+trinary-workspace/backlog/BL-XXXX--<idea-title-slug>.md
+```
+
+Choose the next unused four-digit number by inspecting `backlog/BL-*.md`. Only the project-manager writes backlog files and their `status`; workers and reviewers propose items in their handoffs' `Follow-ups` section.
+
+### Capture
+
+Create an item when:
+
+- The human asks to record an idea.
+- A worker or reviewer handoff lists a follow-up. Capture each one when persisting the handoff, link the handoff as the source, and tell the human which items were added.
+- Feature acceptance finds a limitation that warrants later work.
+
+Before creating an item, check `open` and `discussing` items for the same idea; append to an existing item instead of creating a duplicate. A follow-up never changes the current task's scope or acceptance criteria.
+
+Commit backlog changes, including discussion and status updates, with the next workflow checkpoint on the current branch. If no feature branch is active, ask the human which branch to commit them on. Items committed on an unmerged feature branch are not visible from other branches until it merges.
+
+### Discuss
+
+When the human wants to review the backlog or shape an idea, list `open` and `discussing` items with their IDs, titles, and sources, and let the human choose. Set the chosen item to `discussing` and append each discussion round to its `Discussion` section with a UTC date. Preserve the human's input as a quote, or label it as a paraphrase. Keep this lightweight: record the problem, motivation, rough scope, and open questions. The decision-complete interview happens in step 2 once the item is promoted.
+
+### Promote or drop
+
+Promote an item only when the human explicitly chooses it for the next feature. Start the workflow at step 1; the new feature branch must be based on a branch that contains the item. If the item exists only on another unmerged branch, ask the human whether to merge that branch first or to base the new branch on it. Then run step 2 from the item, set the new IP's `origin` to the item's ID, and set the item's `status` to `promoted` with `promoted_to` naming the IP. From then on the feature README is canonical; do not continue the discussion in the backlog item.
+
+When the human decides not to pursue an item, set it to `dropped` and append the dated reason. Never delete backlog items.
+
+| Status | Meaning |
+| --- | --- |
+| `open` | Captured and not yet discussed. |
+| `discussing` | The human is shaping it; discussion is in progress. |
+| `promoted` | Became the feature named in `promoted_to`. |
+| `dropped` | The human decided not to pursue it; the reason is recorded. |
+
+### Backlog item template
+
+```markdown
+---
+id: BL-0001
+title: Example idea
+status: open
+created_at: 2026-01-01T00:00:00Z
+source: human request
+promoted_to: null
+---
+
+# BL-0001: Example idea
+
+## Idea
+
+Describe the problem or opportunity in a few sentences.
+
+## Context and evidence
+
+- Link the handoff, acceptance record, or conversation it came from, and relevant repository findings.
+
+## Discussion
+
+- [YYYY-MM-DD] Record each discussion round, quoting the human where practical.
+
+## Open questions
+
+- List questions to settle before or during the IP interview, or write `None`.
+```
+
+## Resuming a feature
+
+When a session starts with an existing feature in progress, rebuild state from the durable records before acting; do not rely on earlier chat context.
+
+1. Read the feature README for its status, approved scope, and open questions, and confirm the current branch matches its `branch`. If the plan is still `Draft`, resume the step 2 interview from its open questions instead of the steps below; if it is `Awaiting Human Acceptance`, resume step 7.
+2. Read every task README's `status` and `depends_on`, and the latest handoff in each task's `handoffs/` folder.
+3. Compare `git log` since the baseline commit recorded in the first dispatch handoff and the current worktree with those records. Approved tasks should have commits; uncommitted changes may belong to an interrupted worker.
+4. If a task is `in_progress` or `review` with no matching worker or reviewer handoff, the cycle was interrupted. Inspect the worktree, then redispatch that role with the existing context rather than assuming the work finished.
+5. If records and repository state disagree in a way the project-manager cannot resolve from evidence, ask the human before changing statuses.
+6. Record what was found and decided in a project-manager handoff in the folder of the task the loop continues with, regenerate the dashboard, and continue the task loop in step 6.
 
 ## Status reference
 
@@ -196,15 +340,15 @@ The project-manager is the only writer of task `status` values:
 
 | Status | Meaning |
 | --- | --- |
-| `queued` | The feature plan is not approved, or dependencies remain. |
+| `queued` | One or more dependencies are not yet `done`. |
 | `ready` | Approved and all dependencies are `done`. |
 | `in_progress` | A worker is implementing the task. |
 | `review` | Worker evidence is ready and the project-manager has dispatched review. |
 | `changes_requested` | Reviewer requires worker rework. |
-| `blocked` | The entire feature workflow is paused until the human resolves an external impediment or makes a decision. The project-manager records the needed intervention in a handoff and waits for the human before resuming any task. |
+| `blocked` | The entire feature workflow is paused until the human resolves an impediment or makes a decision. The project-manager records the needed intervention in a handoff and waits for the human before resuming any task. |
 | `done` | Reviewer approved the task. |
 
-Feature plan statuses are `Draft`, `Approved`, `Implementing`, `Awaiting Human Acceptance`, and `Accepted`. Use `Implementing` when the first task starts. `Accepted` requires explicit human acceptance.
+Feature plan statuses are `Draft`, `Approved`, `Implementing`, `Awaiting Human Acceptance`, and `Accepted`. Use `Implementing` from the first dispatch, and again if the human requests changes during acceptance. `Accepted` requires explicit human acceptance.
 
 ## Handoff filenames
 
@@ -214,7 +358,7 @@ Write one new file per role handoff in that task's `handoffs/` directory:
 YYYYMMDD_HHMMSS--<role>-handoff-<n>.md
 ```
 
-Use the UTC time when the handoff is written. `<role>` is `project-manager`, `worker`, `reviewer`, or `human`. The project-manager writes every file, including the `human` response record, which must clearly preserve the human's input rather than imply the human created the file. Increment `<n>` from 1 per role within the task folder. Inspect existing files before writing; if a timestamp collides, choose the next unused sequence number. Handoffs are append-only.
+Use the UTC time when the handoff is written. `<role>` is `project-manager`, `worker`, `reviewer`, or `human`. The project-manager writes every file, including the `human` response record, which must clearly preserve the human's input rather than imply the human created the file. `<n>` counts that role's handoffs within the task folder, starting at 1: inspect existing files and use one more than the highest existing number for that role. Handoffs are append-only.
 
 Use the role template below for every handoff. Replace all bracketed placeholders and remove guidance that does not apply. Keep each handoff append-only; never revise an earlier file to update its contents or verdict.
 
@@ -277,6 +421,10 @@ For a blocker, use `Event: blocker escalation`. State the decision or action req
 
 - [Concern, or `None`]
 
+## Follow-ups
+
+- [Out-of-scope improvement or idea for later, with evidence, or `None`]
+
 ## Next action
 
 - [Project-manager review routing or blocker follow-up]
@@ -311,7 +459,11 @@ VERDICT: CHANGES_REQUESTED
 
 ## Checks run
 
-- `[command or review check]` — [passed, failed, or not run, with result]
+- `[command or review check]` — [run by reviewer or relied on from worker; passed, failed, or not run, with result]
+
+## Follow-ups
+
+- [Out-of-scope improvement or risk worth a later feature, with evidence, or `None`. Do not put required changes for this task here; they are findings.]
 
 ## Next action
 

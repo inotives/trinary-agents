@@ -332,7 +332,7 @@ class DashboardGenerationTests(unittest.TestCase):
             self.assertIn('handoff.content);', page)
             self.assertNotIn('handoff.content).html(', page)
             self.assertNotIn('#handoff-drawer-source").html(', page)
-            app_script = re.search(r'<script>\n    const d3 = window\.d3;([\s\S]*?)\n  </script>', page)
+            app_script = re.search(r'<script>\n    const tasks = ([\s\S]*?)\n  </script>', page)
             self.assertIsNotNone(app_script)
             self.assertNotIn('innerHTML', app_script.group(1))
 
@@ -530,14 +530,14 @@ class DashboardGenerationTests(unittest.TestCase):
             task_data = json.loads(re.search(r"const tasks = (\[.*?\]);", page).group(1))
             embedded = re.search(r"const handoffs = (\[.*?\]);", page).group(1)
             handoffs = json.loads(embedded)
-            expected_lanes = ["Done", "Worker", "Reviewer", "Project manager", "Project manager", "Reviewer", "Worker"]
+            expected_lanes = ["Done", "Worker", "Reviewer", "Project manager", "Project manager", "Project manager", "Worker"]
             self.assertEqual([task["lane"] for task in task_data], expected_lanes)
             self.assertEqual(len({task["id"] for task in task_data}), len(statuses))
             self.assertEqual(task_data[5]["owner"], "Human")
             self.assertEqual([item["task_id"] for item in handoffs], ["T-0006", "T-0003", "T-0002", "T-0001"])
             self.assertEqual(handoffs[1]["sequence"], 10)
             self.assertEqual(handoffs[1]["summary"], "Requested a small layout correction.")
-            self.assertEqual([lane for lane in [task["lane"] for task in task_data] if lane == "Project manager"].count("Project manager"), 2)
+            self.assertEqual([lane for lane in [task["lane"] for task in task_data] if lane == "Project manager"].count("Project manager"), 3)
             self.assertIn('const laneDefinitions = [', page)
             self.assertEqual(page.count('name: "Project manager"'), 1)
             self.assertEqual(page.count('name: "Worker"'), 1)
@@ -569,7 +569,7 @@ class DashboardGenerationTests(unittest.TestCase):
         self.assertEqual(dashboard.current_owner("in_progress", empty_handoff), "Worker")
         self.assertEqual(dashboard.current_owner("ready", empty_handoff), "Project manager")
         self.assertEqual(dashboard.kanban_lane("queued"), "Project manager")
-        self.assertEqual(dashboard.kanban_lane("blocked"), "Reviewer")
+        self.assertEqual(dashboard.kanban_lane("blocked"), "Project manager")
         self.assertEqual(dashboard.kanban_lane("changes_requested"), "Worker")
         self.assertEqual(dashboard.kanban_lane("review"), "Reviewer")
         self.assertEqual(dashboard.kanban_lane("done"), "Done")
@@ -613,7 +613,7 @@ class DashboardGenerationTests(unittest.TestCase):
             self.assertIn('task.status.replaceAll("_", " ")', page)
             self.assertIn('overflow: auto; overscroll-behavior: contain', page)
             self.assertIn('const nodeWidth = 92, nodeHeight = 36', page)
-            self.assertIn('const statusSymbols = { queued: "○", ready: "◇", needs_human: "?", waiting_human: "⌛", in_progress: "▶", changes_requested: "↻", review: "◷", blocked: "!", done: "✓" }', page)
+            self.assertIn('const statusSymbols = { queued: "○", ready: "◇", in_progress: "▶", changes_requested: "↻", review: "◷", blocked: "!", done: "✓" }', page)
             self.assertIn('class: "dependency-node-icon"', page)
             self.assertIn('data-status="blocked"', page)
             self.assertIn('class="dependency-legend" role="group" aria-label="Task status legend"', page)
@@ -684,6 +684,21 @@ class DashboardGenerationTests(unittest.TestCase):
         self.assertNotIn("@tailwindcss/browser", page)
         self.assertNotIn("flaticon.com", page)
         self.assertNotIn("cdn.jsdelivr.net", page)
+
+    def test_dashboard_embeds_only_daisyui_and_its_license(self):
+        page = dashboard.render_html([])
+        self.assertIn("DaisyUI 5.7.50 — MIT", page)
+        self.assertNotIn("Tailwind CSS Browser", page)
+        self.assertNotIn("D3 7.9.0", page)
+        self.assertNotIn("<script src=", page)
+
+    def test_unknown_task_status_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = make_feature_root(temp)
+            write_task(root, "T-0001", "Typo", "in-progress", [])
+            with self.assertRaisesRegex(ValueError, "unknown status 'in-progress'"):
+                dashboard.generate(root)
+            self.assertFalse((root / "dashboard.html").exists())
 
     def test_dashboard_fills_viewport_and_kanban_scrolls_responsively(self):
         page = dashboard.render_html([])

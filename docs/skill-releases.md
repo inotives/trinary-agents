@@ -13,12 +13,19 @@ folder at the archive root, ready to upload to Claude's Skills settings.
 - The `validate-version-bumps` check runs on every pull request to `main` and
   should be required by the `Protect main` ruleset. The importable ruleset
   configuration is in `.github/rulesets/protect-main.json`.
+- The `test-skills` check runs each skill's supporting-tool tests on every pull
+  request to `main` and is also required by that ruleset.
 - Merging to `main` runs the publishing workflow for both skills. It creates a
   release only for a version whose tag has not been published yet. Unchanged
   versions are skipped, so unrelated repository merges do not create duplicate
   releases.
 - Tags use `<skill-name>-v<version>`, for example
   `trinary-agents-v1.0.0` and `trinary-workspace-backup-v1.0.0`.
+- Record user-facing changes in the skill's `CHANGELOG.md` under a
+  `## <version>` heading matching `VERSION`. The publishing workflow uses that
+  section as the release notes, followed by GitHub's generated list of merged
+  pull requests. A version without a changelog section gets generated notes
+  only.
 - Releases are published with ZIP assets named
   `<skill-name>-v<version>.zip`. The ZIP contains the skill directory itself,
   so the `SKILL.md` file remains inside the folder when imported.

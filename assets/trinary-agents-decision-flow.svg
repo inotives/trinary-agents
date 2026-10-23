@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 2010" role="img" aria-labelledby="flow-title flow-desc">
+<title id="flow-title">Trinary Agents decision flow</title>
+<desc id="flow-desc">Decision flow for a Trinary Agents feature. A feature request or promoted backlog item starts a feature branch. The project manager interviews the human until the plan is decision-complete and the human approves it, then decomposes it into tasks. The task loop checks for blocked tasks, finished tasks, and ready tasks, dispatches one task to a worker, routes completed work to an independent reviewer, and either marks the task done or requests up to three rework rounds. Any situation that needs a human decision blocks the task and pauses the whole feature. When every task is done, feature acceptance runs and the human accepts or requests changes.</desc>
+<defs>
+  <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 9 4.5 0 9Z" fill="#8792B2"/></marker>
+  <marker id="arrow-warm" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 9 4.5 0 9Z" fill="#E6AC62"/></marker>
+  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .title { fill: #F4F5FC; font-size: 27px; font-weight: 700; }
+    .subtitle { fill: #AAB4D0; font-size: 14px; }
+    .card-title { fill: #F4F5FC; font-size: 15px; font-weight: 650; }
+    .decision { fill: #F4F5FC; font-size: 14px; font-weight: 600; }
+    .small { fill: #AAB4D0; font-size: 11.5px; }
+    .body { fill: #B9C2DA; font-size: 12.5px; }
+    .edge { fill: #C3CBE2; font-size: 11.5px; font-weight: 600; }
+    .edge-warm { fill: #FFD08D; font-size: 11.5px; font-weight: 600; }
+    .connector { fill: #FFD08D; font-size: 13px; font-weight: 700; }
+    .label { fill: #D6DDF0; font-size: 11px; font-weight: 600; letter-spacing: .4px; }
+  </style>
+</defs>
+<rect width="1120" height="2010" rx="24" fill="#111522"/>
+<rect x="1" y="1" width="1118" height="2008" rx="23" fill="none" stroke="#293149"/>
+<text x="40" y="52" class="title" text-anchor="start">Trinary Agents decision flow</text>
+<text x="40" y="78" class="subtitle" text-anchor="start">Every decision the project manager makes, from request to human acceptance.</text>
+<rect x="770" y="112" width="310" height="196" rx="14" fill="#151A29" stroke="#293149"/>
+<text x="788" y="138" class="label" text-anchor="start">LEGEND</text>
+<rect x="788" y="152" width="22" height="13" rx="4" fill="#1A2031" stroke="#FFBF69" stroke-width="1.5"/>
+<text x="820" y="163" class="body" text-anchor="start">Human decision or input</text>
+<rect x="788" y="174" width="22" height="13" rx="4" fill="#1A2031" stroke="#A99BFF" stroke-width="1.5"/>
+<text x="820" y="185" class="body" text-anchor="start">Project manager</text>
+<rect x="788" y="196" width="22" height="13" rx="4" fill="#1A2031" stroke="#48D8B5" stroke-width="1.5"/>
+<text x="820" y="207" class="body" text-anchor="start">Worker subagent</text>
+<rect x="788" y="218" width="22" height="13" rx="4" fill="#1A2031" stroke="#7FB3FF" stroke-width="1.5"/>
+<text x="820" y="229" class="body" text-anchor="start">Independent reviewer</text>
+<rect x="788" y="240" width="22" height="13" rx="4" fill="#1A2031" stroke="#72E7C8" stroke-width="1.5"/>
+<text x="820" y="251" class="body" text-anchor="start">Committed checkpoint</text>
+<circle cx="799" cy="282" r="15" fill="#3A2D17" stroke="#FFBF69" stroke-width="1.5"/>
+<text x="799" y="287" class="connector" text-anchor="middle">H</text>
+<text x="820" y="278" class="body" text-anchor="start">Needs the human: feature pauses;</text>
+<text x="820" y="294" class="body" text-anchor="start">the affected task is set to blocked</text>
+<rect x="40" y="112" width="250" height="118" rx="14" fill="#1A2031" stroke="#A99BFF" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="165.0" y="138" class="card-title" text-anchor="middle">Backlog</text>
+<text x="165.0" y="162" class="small" text-anchor="middle">BL-XXXX items: open → discussing</text>
+<text x="165.0" y="180" class="small" text-anchor="middle">fed by follow-ups and</text>
+<text x="165.0" y="196" class="small" text-anchor="middle">acceptance limitations</text>
+<text x="165.0" y="216" class="edge-warm" text-anchor="middle">human picks one to promote</text>
+<path d="M290 150 L390 150" fill="none" stroke="#FFBF69" stroke-width="1.8" marker-end="url(#arrow-warm)"/>
+<text x="302" y="142" class="edge-warm" text-anchor="start">promote</text>
+<rect x="390.0" y="130" width="260" height="40" rx="20" fill="#1E2536" stroke="#FFBF69" stroke-width="1.5"/>
+<text x="520" y="155" class="card-title" text-anchor="middle">Feature request</text>
+<path d="M520 170 L520 199" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="355.0" y="199.0" width="330" height="62" rx="14" fill="#1A2031" stroke="#A99BFF" stroke-width="1.5"/>
+<text x="520.0" y="235" class="card-title" text-anchor="middle">1 · Start a feature branch</text>
+<path d="M520 261 L520 289" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="355.0" y="289.0" width="330" height="62" rx="14" fill="#1A2031" stroke="#FFBF69" stroke-width="1.5"/>
+<text x="520.0" y="316" class="card-title" text-anchor="middle">2 · Interview human + investigate code</text>
+<text x="520.0" y="336" class="small" text-anchor="middle">decision tree · IP README in Draft</text>
+<path d="M520 351 L520 384" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M390 430 L520 384 L650 430 L520 476 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="520" y="435" class="decision" text-anchor="middle">Decision-complete?</text>
+<path d="M650 430 L735 430 L735 332 L685.0 332" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="660" y="422" class="edge" text-anchor="start">no</text>
+<text x="785" y="390" class="edge" text-anchor="start">next question round</text>
+<path d="M520 476 L520 504" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="530" y="498" class="edge" text-anchor="start">yes</text>
+<path d="M390 550 L520 504 L650 550 L520 596 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="520" y="555" class="decision" text-anchor="middle">Human approves IP?</text>
+<path d="M650 550 L775 550 L775 308 L685.0 308" fill="none" stroke="#FFBF69" stroke-width="1.8" marker-end="url(#arrow-warm)"/>
+<text x="660" y="542" class="edge-warm" text-anchor="start">no · revise</text>
+<path d="M520 596 L520 629" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="530" y="618" class="edge-warm" text-anchor="start">yes · Approved</text>
+<rect x="355.0" y="629.0" width="330" height="62" rx="14" fill="#1A2031" stroke="#72E7C8" stroke-width="1.5"/>
+<text x="520.0" y="656" class="card-title" text-anchor="middle">3 · Decompose into tasks</text>
+<text x="520.0" y="676" class="small" text-anchor="middle">validate DAG · no-dep tasks ready · baseline commit</text>
+<path d="M520 691 L520 744" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="48" y="723" width="0" height="0"/>
+<text x="532" y="729" class="label" text-anchor="start">task loop</text>
+<path d="M390 790 L520 744 L650 790 L520 836 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="520" y="795" class="decision" text-anchor="middle">Any task blocked?</text>
+<rect x="56" y="830" width="250" height="120" rx="14" fill="#1A2031" stroke="#FFBF69" stroke-width="1.5"/>
+<circle cx="80" cy="854" r="15" fill="#3A2D17" stroke="#FFBF69" stroke-width="1.5"/>
+<text x="80" y="859" class="connector" text-anchor="middle">H</text>
+<text x="193.0" y="859" class="card-title" text-anchor="middle">Human decision</text>
+<text x="181.0" y="884" class="small" text-anchor="middle">PM blocker-escalation handoff</text>
+<text x="181.0" y="902" class="small" text-anchor="middle">wait · human-response handoff</text>
+<text x="181.0" y="920" class="small" text-anchor="middle">no other task is dispatched</text>
+<text x="181.0" y="938" class="edge-warm" text-anchor="middle">resolved → status updated</text>
+<path d="M390 790 L181.0 790 L181.0 830" fill="none" stroke="#FFBF69" stroke-width="1.8" marker-end="url(#arrow-warm)"/>
+<text x="380" y="782" class="edge-warm" text-anchor="end">yes</text>
+<path d="M56 890.0 L34 890.0" fill="none" stroke="#FFBF69" stroke-width="1.8"/>
+<path d="M520 836 L520 859" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="530" y="858" class="edge" text-anchor="start">no</text>
+<path d="M390 905 L520 859 L650 905 L520 951 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="520" y="910" class="decision" text-anchor="middle">All tasks done?</text>
+<path d="M520 951 L520 974" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="530" y="973" class="edge" text-anchor="start">no</text>
+<path d="M390 1020 L520 974 L650 1020 L520 1066 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="520" y="1025" class="decision" text-anchor="middle">A task ready?</text>
+<path d="M650 1020 L805 1020" fill="none" stroke="#FFBF69" stroke-width="1.8" marker-end="url(#arrow-warm)"/>
+<circle cx="820" cy="1020" r="15" fill="#3A2D17" stroke="#FFBF69" stroke-width="1.5"/>
+<text x="820" y="1025" class="connector" text-anchor="middle">H</text>
+<text x="660" y="1012" class="edge-warm" text-anchor="start">no · stalled</text>
+<path d="M520 1066 L520 1104" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="530" y="1088" class="edge" text-anchor="start">yes · pick one in dependency order</text>
+<rect x="355.0" y="1104.0" width="330" height="62" rx="14" fill="#1A2031" stroke="#48D8B5" stroke-width="1.5"/>
+<text x="520.0" y="1131" class="card-title" text-anchor="middle">4 · Dispatch one task → Worker</text>
+<text x="520.0" y="1151" class="small" text-anchor="middle">task in_progress · plan Implementing</text>
+<path d="M520 1166 L520 1209" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M390 1255 L520 1209 L650 1255 L520 1301 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="520" y="1260" class="decision" text-anchor="middle">Worker outcome?</text>
+<path d="M390 1255 L330 1255 L330 1135 L355.0 1135" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="320" y="1247" class="edge" text-anchor="end">partial · in scope</text>
+<path d="M650 1255 L805 1255" fill="none" stroke="#FFBF69" stroke-width="1.8" marker-end="url(#arrow-warm)"/>
+<circle cx="820" cy="1255" r="15" fill="#3A2D17" stroke="#FFBF69" stroke-width="1.5"/>
+<text x="820" y="1260" class="connector" text-anchor="middle">H</text>
+<text x="660" y="1247" class="edge-warm" text-anchor="start">blocked / plan change</text>
+<path d="M520 1301 L520 1339" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="530" y="1323" class="edge" text-anchor="start">completed</text>
+<rect x="355.0" y="1339.0" width="330" height="62" rx="14" fill="#1A2031" stroke="#7FB3FF" stroke-width="1.5"/>
+<text x="520.0" y="1366" class="card-title" text-anchor="middle">5 · Independent reviewer</text>
+<text x="520.0" y="1386" class="small" text-anchor="middle">task review · reruns key checks</text>
+<path d="M520 1401 L520 1439" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M390 1485 L520 1439 L650 1485 L520 1531 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="520" y="1490" class="decision" text-anchor="middle">Verdict?</text>
+<path d="M795 1485 L905 1441 L1015 1485 L905 1529 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="905" y="1490" class="decision" text-anchor="middle">≤ 3 rework rounds?</text>
+<path d="M650 1485 L795 1485" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="658" y="1477" class="edge" text-anchor="start">CHANGES_REQUESTED</text>
+<path d="M905 1441 L905 1135 L685.0 1135" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="915" y="1415" class="edge" text-anchor="start">yes · rework</text>
+<text x="915" y="1431" class="edge" text-anchor="start">with findings</text>
+<path d="M905 1529 L905 1570" fill="none" stroke="#FFBF69" stroke-width="1.8" marker-end="url(#arrow-warm)"/>
+<circle cx="905" cy="1585" r="15" fill="#3A2D17" stroke="#FFBF69" stroke-width="1.5"/>
+<text x="905" y="1590" class="connector" text-anchor="middle">H</text>
+<text x="915" y="1551" class="edge-warm" text-anchor="start">no</text>
+<path d="M520 1531 L520 1579" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="530" y="1553" class="edge" text-anchor="start">APPROVED</text>
+<rect x="355.0" y="1579.0" width="330" height="62" rx="14" fill="#1A2031" stroke="#72E7C8" stroke-width="1.5"/>
+<text x="520.0" y="1606" class="card-title" text-anchor="middle">6 · Task done · commit</text>
+<text x="520.0" y="1626" class="small" text-anchor="middle">dependents → ready · follow-ups → backlog</text>
+<path d="M355.0 1610 L34 1610 L34 725 L518 725" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="44" y="1602" class="edge" text-anchor="start">next cycle</text>
+<path d="M650 905 L1080 905 L1080 1725 L685.0 1725" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="660" y="897" class="edge" text-anchor="start">yes</text>
+<rect x="355.0" y="1694.0" width="330" height="62" rx="14" fill="#1A2031" stroke="#A99BFF" stroke-width="1.5"/>
+<text x="520.0" y="1721" class="card-title" text-anchor="middle">7 · Run feature acceptance checks</text>
+<text x="520.0" y="1741" class="small" text-anchor="middle">plan Awaiting Human Acceptance</text>
+<path d="M520 1756 L520 1784" fill="none" stroke="#8792B2" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M390 1830 L520 1784 L650 1830 L520 1876 Z" fill="#1E2536" stroke="#58627E" stroke-width="1.5"/>
+<text x="520" y="1835" class="decision" text-anchor="middle">Human accepts?</text>
+<path d="M390 1830 L34 1830 L34 1610" fill="none" stroke="#FFBF69" stroke-width="1.8"/>
+<text x="380" y="1822" class="edge-warm" text-anchor="end">changes · plan change → Implementing</text>
+<path d="M520 1876 L520 1930" fill="none" stroke="#FFBF69" stroke-width="1.8" marker-end="url(#arrow-warm)"/>
+<text x="530" y="1898" class="edge-warm" text-anchor="start">yes</text>
+<rect x="380.0" y="1930" width="280" height="40" rx="20" fill="#1E2536" stroke="#72E7C8" stroke-width="1.5"/>
+<text x="520" y="1955" class="card-title" text-anchor="middle">Accepted · commit record</text>
+</svg>

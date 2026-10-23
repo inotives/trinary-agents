@@ -57,7 +57,9 @@ skills/
 └── <skill-name>/
     ├── SKILL.md          # purpose, trigger, workflow, requirements, limits
     ├── VERSION           # independent SemVer version for this skill
+    ├── CHANGELOG.md      # per-version notes used for GitHub Releases
     ├── assets/           # optional bundled resources
+    ├── references/       # optional detail loaded only when needed
     ├── scripts/          # optional supporting tools
     └── tests/            # optional checks for supporting tools
 ```
@@ -107,6 +109,41 @@ into dependency-aware tasks, validates the task graph, commits the plan and task
 baseline, and dispatches ready work. There is no separate approval for the task
 breakdown; material changes to the approved scope still need human approval.
 
+### Decision flow
+
+The project manager runs one task at a time through the loop below. Any point
+that needs a human decision (marked **H**) pauses the whole feature until the
+human responds; when a specific task needs the decision, it is set to
+`blocked`. Out-of-scope follow-ups and
+acceptance limitations go to the backlog, where the human can later promote
+one into the next feature plan.
+
+![Trinary Agents decision flow: a feature request or promoted backlog item starts a feature branch; the project manager interviews the human until the plan is decision-complete and approved, decomposes it into tasks, then loops — pausing for the human when a task is blocked, dispatching one ready task to a worker, sending completed work to an independent reviewer, allowing up to three rework rounds, and committing each approved task — until every task is done and the human accepts the feature](assets/trinary-agents-decision-flow.svg)
+
+### Backlog
+
+The backlog holds ideas that are not part of an approved feature yet. Each item
+is one Markdown file in `trinary-workspace/backlog/BL-XXXX--<idea-slug>.md`;
+the template and rules are in the skill's `SKILL.md`.
+
+- **Capture.** Items come from the human ("add this to the backlog"), from
+  `Follow-ups` in worker and reviewer handoffs, and from limitations found
+  during feature acceptance. The project manager writes every item and tells
+  the human which ones it added. Follow-ups never change the current task's
+  scope.
+- **Discuss.** Ask to go through the backlog and the project manager lists the
+  `open` and `discussing` items. Pick one to shape; each discussion round is
+  appended to the item with the human's input preserved.
+- **Promote or drop.** Only the human chooses an item for the next feature. The
+  project manager starts a new feature branch, uses the item's notes to seed the
+  plan interview, records the item as the plan's `origin`, and marks the item
+  `promoted`. Items the human rejects are marked `dropped` with the reason.
+  Items are never deleted.
+
+Backlog changes are committed with the next workflow checkpoint on the current
+branch, so items captured on an unmerged feature branch only appear on other
+branches after it merges.
+
 For any feature with one or more valid task READMEs, the skill generates a
 read-only dashboard for monitoring task status, dependencies, progress, and
 handoff activity. Task READMEs remain the source of truth. Each task card has a
@@ -117,7 +154,9 @@ Python packages need to be installed. Check availability with
 `python3 --version`. The skill bundles its DaisyUI stylesheet and embeds it in
 each generated dashboard. The page uses browser-native DOM and SVG APIs and
 makes no third-party runtime requests. See the skill's
-[`SKILL.md`](skills/trinary-agents/SKILL.md) for setup and generation details.
+[`SKILL.md`](skills/trinary-agents/SKILL.md) for when to generate it and the
+[dashboard reference](skills/trinary-agents/references/dashboard.md) for setup
+and page details.
 
 ## Trinary Agents UI Dashboard
 
@@ -157,8 +196,11 @@ skill and ask the human how to proceed.
 
 ## Workflow Records
 
-The Trinary Agents workflow stores feature plans, task briefs, and handoffs in
-a `trinary-workspace/` directory at the target project's repository root. The
+The Trinary Agents workflow stores its backlog, feature plans, task briefs, and
+handoffs in a `trinary-workspace/` directory at the target project's repository
+root. Backlog items capture ideas and review follow-ups, hold the discussion
+that shapes them, and are promoted into a new feature plan when the human
+chooses one. The
 skill's `SKILL.md` defines its structure and rules. Workspace records are
 project data and are not included in this repository; the directory is ignored
 by this repo's `.gitignore`.
