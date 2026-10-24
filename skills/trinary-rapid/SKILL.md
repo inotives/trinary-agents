@@ -90,11 +90,11 @@ Summarize the request, quoting the human where practical, and the relevant repos
 - Record the human's explicit approval and its UTC timestamp.
 ```
 
-Steps are small, verifiable, and ordered. Each acceptance check states how it is verified, with a command where possible. The plan stays `Draft` until approved.
+Steps are small, verifiable, and ordered. Each acceptance check states how it is verified, with a command where possible. The plan stays `Draft` until approved; until then, write `Pending` under Plan approval.
 
 ### 5. Get approval and commit the plan
 
-Present the plan for review. This is the only approval gate: there are no per-step approvals and no separate acceptance step. Do not change project files until the human explicitly approves. Record the approval with its UTC timestamp under Plan approval, set `status: Approved`, and commit the plan (and the promoted backlog item, if any) on the feature branch. If `trinary-workspace/` is ignored by Git, do not force-add it; tell the human and record that in Decisions.
+Present the plan for review. This is the only approval gate: there are no per-step approvals and no separate acceptance step. Do not change project files until the human explicitly approves. Record the approval with its UTC timestamp under Plan approval, set `status: Approved`, and commit the plan, the workspace README if you created or changed it, and the promoted backlog item, if any, on the feature branch. This is the plan commit. If `trinary-workspace/` is ignored by Git, do not force-add it; tell the human and record that in Decisions.
 
 If the approved plan must change materially later, stop, explain the change, update the plan, and get approval again before continuing; record the change in Decisions and the new approval under Plan approval.
 
@@ -106,7 +106,7 @@ Work through Steps in order. After each step, tick it and add a one-line note: w
 
 ### 7. Run one independent review
 
-Review is on by default. When implementation is done, start a reviewer subagent that did not implement any part of the work. Give it the plan, the diff since the plan commit including untracked files (`git status`), and the acceptance checks. Ask it to check correctness, scope, acceptance checks, and regressions, to run the checks itself where practical, and to report which checks it ran versus relied on, with concrete findings.
+Review is on by default. When implementation is done, start a reviewer subagent that did not implement any part of the work. Give it the plan, the diff since the plan commit (or the branch point when the workspace is not committed) including untracked files (`git status`), and the acceptance checks. Ask it to check correctness, scope, acceptance checks, and regressions, to run the checks itself where practical, and to report which checks it ran versus relied on, with concrete findings.
 
 Fix in-scope findings, rerun the affected checks, and update the step notes. Findings that are not fixed go to Pending issues. Run one review; a second only if the human asks.
 
@@ -156,8 +156,8 @@ Summarize what was delivered and how it meets the goal in two or three sentences
 
 ## Review
 
-- Reviewer: name the reviewing subagent when `review: independent`. When `review` is `self-verified` or `skipped`, write `Not independently reviewed.` and the reason, and set `reviewer: null`.
-- Checks rerun: list the checks the reviewer ran itself.
+- Reviewer: name the reviewing subagent when `review: independent`. When `review` is `self-verified` or `skipped`, replace this line with the sentence `Not independently reviewed` (ending with a period) and the reason, and set `reviewer: null`.
+- Checks rerun: list the checks the reviewer ran itself, or that the main agent ran when self-verified; write `None` when review was skipped.
 - Findings: list each finding and how it was resolved, or write `None`.
 
 ## Pending issues
@@ -172,7 +172,7 @@ Summarize what was delivered and how it meets the goal in two or three sentences
 ```
 
 - The first line of Outcome is exactly `RESULT: DELIVERED`, `RESULT: PARTIAL`, or `RESULT: NOT_DELIVERED`. Use `DELIVERED` only when every acceptance check passed. Use `NOT_DELIVERED` when the goal is not met or no acceptance check passed, and `PARTIAL` otherwise.
-- Acceptance checks has one row per plan check; Result is `passed`, `failed`, or `not run`.
+- Acceptance checks has one row per plan check; Result is `passed`, `failed`, or `not run`. Write a literal `|` inside a table cell as `\|`.
 - Changes lists every changed file with a one-line description.
 - `review` is `independent`, `self-verified`, or `skipped`; `reviewer` names the reviewing subagent when `review: independent`, and is `null` when `review` is `self-verified` or `skipped`.
 - Pending issues uses severity `high`, `medium`, or `low`. Capture each out-of-scope issue as a backlog item and put its ID in Backlog; write `-` for issues not captured. With no pending issues, keep the table with a single row `| None | - | - |`.
@@ -188,7 +188,7 @@ Resolve `<skill-dir>` as the directory that contains this `SKILL.md`, not the pr
 
 ### 9. Finish
 
-Set the plan's `status: Reported` and commit the implementation, plan, `report.md`, `report.html`, and any new backlog items together. If `trinary-workspace/` is ignored by Git, do not force-add it: commit only the implementation files and tell the human where the plan and report are. Give the human the outcome line, the report paths, and the pending issues. The report ends the flow. Later changes are a new rapid feature or follow-up run. Do not push or merge unless asked.
+Set the plan's `status: Reported`, tick each plan acceptance check that passed, and commit the implementation, plan, `report.md`, `report.html`, any new backlog items, and any workspace README change together. If `trinary-workspace/` is ignored by Git, do not force-add it: commit only the implementation files and tell the human where the plan and report are. Give the human the outcome line, the report paths, and the pending issues. The report ends the flow. Later changes are a new rapid feature or follow-up run. Do not push or merge unless asked.
 
 ## Backlog
 
@@ -243,7 +243,7 @@ For `type: bug` only; remove this section for ideas.
 Rebuild state from the plan and the repository, not from earlier chat context.
 
 1. Read the plan's `status` and confirm the current branch matches its `branch`. If it is `Draft`, resume the interview or approval. If it is `Approved`, start step 6. If it is `Reported`, the flow is finished; treat new requests as a new rapid feature or follow-up run.
-2. If it is `Implementing`, read the Steps checklist and inspect `git status` and `git diff` (and `git log` since the plan commit).
+2. If it is `Implementing`, read the Steps checklist and inspect `git status` and `git diff` (and `git log` since the plan commit, or the branch point when the workspace is not committed).
 3. Report what you found to the human: ticked steps, uncommitted changes, and any step that looks partially done. Verify partial work from the diff rather than guessing; finish or correct it, then continue from the first unticked step. If every step is ticked, continue with step 7 if no review is recorded in Decisions, otherwise with step 8; if `report.md` exists, re-validate and re-render it.
 
 ## Status reference

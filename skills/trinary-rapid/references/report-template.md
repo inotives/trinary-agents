@@ -35,8 +35,8 @@ Summarize what was delivered and how it meets the goal in two or three sentences
 
 ## Review
 
-- Reviewer: name the reviewing subagent when `review: independent`. When `review` is `self-verified` or `skipped`, write `Not independently reviewed.` and the reason, and set `reviewer: null`.
-- Checks rerun: list the checks the reviewer ran itself.
+- Reviewer: name the reviewing subagent when `review: independent`. When `review` is `self-verified` or `skipped`, replace this line with the sentence `Not independently reviewed` (ending with a period) and the reason, and set `reviewer: null`.
+- Checks rerun: list the checks the reviewer ran itself, or that the main agent ran when self-verified; write `None` when review was skipped.
 - Findings: list each finding and how it was resolved, or write `None`.
 
 ## Pending issues

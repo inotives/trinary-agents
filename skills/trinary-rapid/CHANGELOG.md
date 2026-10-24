@@ -22,6 +22,9 @@ its GitHub Release notes.
 - An escalation rule that recommends a full trinary-agents feature plan for
   multi-module work, more than about five steps, or questions still open
   after the second interview round.
+- On finish, the plan's passed acceptance checks are ticked and the plan,
+  report, rendered report, new backlog items, and workspace README changes
+  are committed with the implementation.
 - A resume rule for `Implementing` rapid features based on the step checklist
   and `git status`/`git diff`.
 - Shared backlog integration: out-of-scope pending issues become `BL-XXXX`

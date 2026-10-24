@@ -256,10 +256,11 @@ The Trinary Agents workflow stores its backlog, feature plans, task briefs, and
 handoffs in a `trinary-workspace/` directory at the target project's repository
 root. Backlog items capture ideas, bugs, and review follow-ups, hold the discussion
 that shapes them, and are promoted into a new feature plan when the human
-chooses one. The
-skill's `SKILL.md` defines its structure and rules. Workspace records are
-project data and are not included in this repository; the directory is ignored
-by this repo's `.gitignore`.
+chooses one. Trinary Rapid keeps its features in `trinary-workspace/rapid/`,
+one folder per feature holding the plan, `report.md`, and `report.html`, and
+shares the same backlog. Each skill's `SKILL.md` defines its structure and
+rules. Workspace records are project data and are not included in this
+repository; the directory is ignored by this repo's `.gitignore`.
 
 ## Development Principles
 
