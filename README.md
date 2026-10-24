@@ -76,7 +76,7 @@ that skill's `VERSION`; GitHub checks this before allowing the merge. See the
 | Skill | What it does |
 | --- | --- |
 | [Trinary Agents](skills/trinary-agents/SKILL.md) | Plan feature work, track dependencies, coordinate implementation and independent review, and preserve decisions in Markdown handoffs. |
-| [Trinary Rapid](skills/trinary-rapid/SKILL.md) | Deliver a small, well-bounded feature or fix fast: a short interview, one plan approval, one independent review, and a templated report rendered to HTML. |
+| [Trinary Rapid](skills/trinary-rapid/SKILL.md) | Deliver a small, well-bounded feature or fix fast: a short interview, one plan approval, one independent review, a templated report rendered to HTML, and a final human acceptance. |
 | [Trinary Workspace Backup](skills/trinary-workspace-backup/SKILL.md) | Back up, verify, and restore `trinary-workspace/` through a connected Google Drive integration. |
 
 Download the latest ZIP releases from the
@@ -226,8 +226,11 @@ requested changes return the plan to `Implementing`.
 
 The skill's renderer validates `report.md` against the template and writes a
 self-contained `report.html` with an embedded stylesheet and no network
-requests. It requires Python 3 and uses only the standard library. If Python 3
-is unavailable, `report.md` remains the deliverable. When `trinary-workspace/`
+requests. The page uses the Trinary Agents dashboard palette in dark and light
+themes, with a header button to switch between them; the palette lives in
+`assets/report/report-theme.css`. It requires Python 3 and uses only the
+standard library. If Python 3 is unavailable, `report.md` remains the
+deliverable. When `trinary-workspace/`
 is ignored by Git, rapid commits none of its records (plan, report, backlog
 items) unless the human asks for specific files, such as backlog items, to be
 committed; it commits the implementation files and tells the human where the

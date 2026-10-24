@@ -8,10 +8,24 @@ independent review, and durable Markdown handoffs. The core workflow is designed
 to work across agent harnesses such as Codex, Claude, Pi, and OpenCode. Keep its
 instructions independent of any one vendor, CLI, or runtime.
 
-The first skill is [`skills/trinary-agents/SKILL.md`](skills/trinary-agents/SKILL.md).
-Its optional dashboard generator and tests are in
-`skills/trinary-agents/scripts/` and `skills/trinary-agents/tests/`. The README
-describes the project layout and principles.
+The skills are:
+
+- [`skills/trinary-agents/SKILL.md`](skills/trinary-agents/SKILL.md): the core
+  project-manager, worker, and reviewer workflow. Its optional dashboard
+  generator and tests are in `skills/trinary-agents/scripts/` and
+  `skills/trinary-agents/tests/`.
+- [`skills/trinary-rapid/SKILL.md`](skills/trinary-rapid/SKILL.md): a
+  lightweight companion for small features with one plan approval, one
+  review, a templated report, and human acceptance. Its report renderer and
+  tests are in `skills/trinary-rapid/scripts/` and
+  `skills/trinary-rapid/tests/`; the report theme and pinned stylesheet are in
+  `skills/trinary-rapid/assets/report/`.
+- [`skills/trinary-workspace-backup/SKILL.md`](skills/trinary-workspace-backup/SKILL.md):
+  backs up and restores `trinary-workspace/` through a connected Google Drive
+  integration.
+
+The README describes the project layout and principles, and
+[`docs/skill-releases.md`](docs/skill-releases.md) the release process.
 
 ## Working in this repository
 
@@ -23,6 +37,14 @@ describes the project layout and principles.
   section becomes the release notes.
 - Keep each skill self-contained, easy to copy, and clear about its trigger,
   workflow, requirements, and limitations.
+- When adding a skill, also add it to the publish matrix and `test-skills`
+  job in `.github/workflows/publish-skills.yml`, the `SKILLS` tuple in
+  `.github/scripts/validate_skill_versions.py`, `docs/skill-releases.md`, and
+  the README skills table and install examples.
+- Run a skill's tests with
+  `python3 -m unittest discover -s skills/<skill>/tests`.
+- Keep `trinary-rapid` statuses and conventions aligned with
+  `trinary-agents`; change both deliberately when one changes.
 - Prefer ordinary Markdown and existing platform capabilities. Do not add a
   harness-specific dependency to the core workflow; document optional adapters
   separately.
