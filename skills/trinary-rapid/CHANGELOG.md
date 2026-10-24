@@ -28,3 +28,12 @@ its GitHub Release notes.
   items, and a rapid feature may start from a backlog item.
 - Self-verified or skipped reviews are reported as "Not independently
   reviewed."
+- `scripts/render_report.py` (Python 3 standard library only) validates
+  `report.md` against the template and renders `report.html` with the
+  `RESULT:` badge, every report section, and the plan's goal, scope, and
+  decisions. It names every missing or invalid item and writes nothing when
+  validation fails, and never overwrites a `report.html` it did not generate.
+- The rendered page embeds the pinned DaisyUI 5.7.50 stylesheet and its MIT
+  license notice from `assets/report/` and makes no network requests.
+- `references/report.md` documents the renderer's checks, layout, and
+  Markdown subset; `tests/test_render_report.py` covers it.

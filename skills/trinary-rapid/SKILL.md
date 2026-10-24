@@ -184,7 +184,7 @@ Render the HTML report with the skill's renderer:
 python3 <skill-dir>/scripts/render_report.py trinary-workspace/rapid/RF-XXXX--<slug>
 ```
 
-Resolve `<skill-dir>` as the directory that contains this `SKILL.md`, not the project root; harnesses install skills in different locations (for example `.claude/skills/trinary-rapid/` or `.agents/skills/trinary-rapid/`). The renderer writes `report.html` beside `report.md`, embedding its stylesheet and the plan's goal, scope, and decisions; it makes no network requests. If it refuses because a frontmatter key, section, or `RESULT:` line is missing, fix `report.md` and rerun. If Python 3 is unavailable, tell the human and continue: `report.md` is the deliverable.
+Resolve `<skill-dir>` as the directory that contains this `SKILL.md`, not the project root; harnesses install skills in different locations (for example `.claude/skills/trinary-rapid/` or `.agents/skills/trinary-rapid/`). The renderer writes `report.html` beside `report.md`, embedding its stylesheet and the plan's goal, scope, and decisions; it makes no network requests. If it refuses, it names each missing or invalid item; fix `report.md` and rerun. [references/report.md](references/report.md) lists every rule it checks. If Python 3 is unavailable, tell the human and continue: `report.md` is the deliverable.
 
 ### 9. Finish
 
