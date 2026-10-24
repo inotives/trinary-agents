@@ -1,9 +1,12 @@
 # Report runtime assets
 
-This pinned third-party stylesheet is embedded into each rendered
-`report.html` so the report makes no runtime resource requests. The renderer
-has no package dependencies. Keep the adjacent license file and the notice
-block embedded in each rendered HTML page when distributing the asset or page.
+This pinned third-party stylesheet and the skill's own `report-theme.css` are
+embedded into each rendered `report.html` so the report makes no runtime
+resource requests. `report-theme.css` is the report's dark and light palette,
+based on the trinary-agents dashboard; it is first-party and not pinned. The
+renderer has no package dependencies. Keep the adjacent license file and the
+notice block embedded in each rendered HTML page when distributing the asset
+or page.
 
 Copied unchanged from the trinary-agents dashboard assets, which were verified
 from the exact npm package metadata and license file on 2026-10-18:

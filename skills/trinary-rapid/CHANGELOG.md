@@ -38,5 +38,8 @@ its GitHub Release notes.
   validation fails, and never overwrites a `report.html` it did not generate.
 - The rendered page embeds the pinned DaisyUI 5.7.50 stylesheet and its MIT
   license notice from `assets/report/` and makes no network requests.
+- The report uses the trinary-agents dashboard palette from
+  `assets/report/report-theme.css`, with dark and light themes and a header
+  toggle button that remembers the viewer's choice.
 - `references/report.md` documents the renderer's checks, layout, and
   Markdown subset; `tests/test_render_report.py` covers it.

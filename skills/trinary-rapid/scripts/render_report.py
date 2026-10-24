@@ -22,6 +22,8 @@ ASSETS = Path(__file__).resolve().parent.parent / "assets" / "report"
 CSS_FILE = "daisyui-5.7.50.css"
 LICENSE_FILE = "LICENSE-daisyui-MIT.txt"
 LICENSE_LABEL = "DaisyUI 5.7.50 — MIT"
+THEME_FILE = "report-theme.css"
+THEME_STORAGE_KEY = "trinary-rapid-theme"
 
 # --- Report contract (references/report-template.md) -----------------------
 REQUIRED_FRONTMATTER = (
@@ -387,14 +389,18 @@ def find_project_name(folder):
 
 # --- Rendering -------------------------------------------------------------
 
-def read_assets():
-    css = (ASSETS / CSS_FILE).read_text(encoding="utf-8")
+def read_stylesheet(name):
+    css = (ASSETS / name).read_text(encoding="utf-8")
     if "</style" in css.lower():
-        raise ValueError(f"{CSS_FILE} contains a style-closing sequence")
+        raise ValueError(f"{name} contains a style-closing sequence")
+    return css
+
+
+def read_assets():
     notice = (ASSETS / LICENSE_FILE).read_text(encoding="utf-8").strip()
     if "-->" in notice:
         raise ValueError(f"{LICENSE_FILE} contains an HTML comment terminator")
-    return css, f"{LICENSE_LABEL}\n{notice}"
+    return read_stylesheet(CSS_FILE), read_stylesheet(THEME_FILE), f"{LICENSE_LABEL}\n{notice}"
 
 
 def escape(text):
@@ -483,7 +489,7 @@ def section_id(heading):
 
 
 def render_html(report, plan, project_name):
-    css, license_notice = read_assets()
+    css, theme_css, license_notice = read_assets()
     fields = report["fields"]
     sections = report["sections"]
     result = report["result"]
@@ -507,8 +513,9 @@ def render_html(report, plan, project_name):
                 f'<span class="badge badge-lg {RESULT_BADGES[result]}">{escape(result)}</span></p>\n{content}'
             )
         rendered_sections.append(
-            f'<section class="card bg-base-100 shadow-sm report-section" id="{section_id(heading)}">'
-            f'<div class="card-body"><h2 class="card-title">{escape(heading)}</h2>\n{content}</div></section>'
+            f'<section class="card panel report-section" id="{section_id(heading)}">'
+            f'<div class="card-body"><h2 class="card-title">{escape(heading)}</h2>\n'
+            f'<div class="section-content">{content}</div></div></section>'
         )
 
     plan_parts = []
@@ -518,7 +525,7 @@ def render_html(report, plan, project_name):
     plan_fields = plan["fields"]
     plan_label = " ".join(value for value in (plan_fields.get("id"), plan_fields.get("title")) if value)
     plan_html = (
-        '<details class="collapse collapse-arrow bg-base-100 shadow-sm plan">'
+        '<details class="collapse collapse-arrow panel plan">'
         f'<summary class="collapse-title font-semibold">Plan: {escape(plan_label or "README.md")} '
         "(Goal, Scope, Decisions)</summary>"
         f'<div class="collapse-content">{"".join(plan_parts)}</div></details>'
@@ -540,50 +547,61 @@ def render_html(report, plan, project_name):
 
     return f'''<!doctype html>
 {MARKER}
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{escape(title_text)}</title>
   <style id="daisyui-styles">{css}</style>
-  <style>
-    body {{ margin: 0; background: var(--color-base-200); color: var(--color-base-content); font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.55; }}
-    main {{ box-sizing: border-box; max-width: 64rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; display: grid; gap: 1rem; }}
-    header h1 {{ margin: 0 0 .25rem; font-size: 1.6rem; line-height: 1.25; }}
-    .kicker {{ margin: 0; font: 700 .72rem/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }}
-    .hero {{ display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }}
-    .hero .badge {{ font-size: 1.15rem; padding: 1rem 1.25rem; font-weight: 700; }}
-    dl.meta {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .5rem 1rem; margin: 0; }}
-    dl.meta dt {{ font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; opacity: .65; }}
-    dl.meta dd {{ margin: 0; overflow-wrap: anywhere; }}
-    .report-section h3, .report-section h4, .plan h3, .plan h4 {{ margin: .75rem 0 .25rem; font-weight: 600; }}
-    .report-section p, .plan p {{ margin: .25rem 0; }}
-    .report-section ul, .report-section ol, .plan ul, .plan ol {{ margin: .25rem 0; padding-left: 1.5rem; }}
-    ul {{ list-style: disc; }} ol {{ list-style: decimal; }}
-    li.task-item {{ list-style: none; margin-left: -1.5rem; display: flex; gap: .5rem; align-items: baseline; }}
-    code {{ font-family: ui-monospace, SFMono-Regular, monospace; font-size: .88em; background: var(--color-base-200); padding: .05rem .3rem; border-radius: .25rem; overflow-wrap: anywhere; }}
-    pre.code-block {{ background: var(--color-base-200); padding: .75rem; border-radius: .5rem; overflow-x: auto; }}
-    pre.code-block code {{ background: none; padding: 0; }}
-    .table-wrap {{ overflow-x: auto; }}
-    .link-target {{ opacity: .65; font-size: .9em; }}
-    .result-line {{ font-weight: 600; }}
-    .review-note {{ font-weight: 600; }}
-    footer {{ font-size: .8rem; opacity: .65; text-align: center; }}
-  </style>
+  <style id="report-theme">{theme_css}</style>
+  <script>
+    (() => {{
+      const key = "{THEME_STORAGE_KEY}";
+      const root = document.documentElement;
+      let saved = null;
+      try {{ saved = localStorage.getItem(key); }} catch (error) {{}}
+      const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+      const apply = theme => {{
+        root.setAttribute("data-theme", theme);
+        const button = document.getElementById("theme-toggle");
+        if (!button) return;
+        const next = theme === "dark" ? "light" : "dark";
+        button.setAttribute("aria-label", `Switch to ${{next}} theme`);
+        button.setAttribute("title", `Switch to ${{next}} theme`);
+        button.setAttribute("aria-pressed", String(theme === "dark"));
+      }};
+      apply(saved === "light" || saved === "dark" ? saved : prefersLight ? "light" : "dark");
+      document.addEventListener("DOMContentLoaded", () => {{
+        const button = document.getElementById("theme-toggle");
+        apply(root.getAttribute("data-theme"));
+        button.addEventListener("click", () => {{
+          const theme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          apply(theme);
+          try {{ localStorage.setItem(key, theme); }} catch (error) {{}}
+        }});
+      }});
+    }})();
+  </script>
 </head>
 <body>
 <main>
-  <header class="card bg-base-100 shadow-sm">
-    <div class="card-body">
-      <p class="kicker">Trinary-RAPID Report :: {escape(project_name)}</p>
-      <h1>{escape(fields["id"])} {escape(fields["title"])}</h1>
-      <div class="hero"><span class="badge badge-lg {RESULT_BADGES[result]}" id="result-badge">RESULT: {escape(result)}</span>{review_note}</div>
-      <dl class="meta">{meta_html}</dl>
+  <header class="report-header">
+    <div class="report-header-top">
+      <div>
+        <p class="kicker">Trinary-RAPID Report :: {escape(project_name)}</p>
+        <h1>{escape(fields["id"])} {escape(fields["title"])}</h1>
+      </div>
+      <button id="theme-toggle" class="btn btn-circle btn-ghost btn-sm theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme" aria-pressed="true">
+        <svg class="theme-icon theme-icon-sun" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="theme-icon theme-icon-moon" aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+      </button>
     </div>
+    <div class="hero"><span class="badge badge-lg {RESULT_BADGES[result]}" id="result-badge">RESULT: {escape(result)}</span>{review_note}</div>
+    <dl class="meta">{meta_html}</dl>
   </header>
   {plan_html}
   {"".join(rendered_sections)}
-  <footer>Rendered from report.md and README.md by the trinary-rapid skill. Styled with locally embedded DaisyUI; no external resources.</footer>
+  <footer>Rendered from report.md and README.md by the trinary-rapid skill. Styled with locally embedded DaisyUI and the report theme; no external resources.</footer>
 </main>
 <!--
 {license_notice}

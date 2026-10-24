@@ -15,11 +15,21 @@ python3 <skill-dir>/scripts/render_report.py trinary-workspace/rapid/RF-XXXX--<s
 Rendering requires Python 3 and uses only the standard library; no packages
 need to be installed. Check availability with `python3 --version`.
 
-The DaisyUI 5.7.50 stylesheet in `assets/report/` is embedded into each
-rendered page with its license notice. The page has no scripts, links, images,
-or other resource references and makes no network requests. The only
+The DaisyUI 5.7.50 stylesheet and the report theme (`report-theme.css`) in
+`assets/report/` are embedded into each rendered page, with DaisyUI's license
+notice. The page's only script is a small inline theme toggle; it has no links,
+images, or other resource references and makes no network requests. The only
 `http://` strings in the page are the standard SVG/XLink XML namespace
 identifiers inside the stylesheet's inline `data:` images.
+
+## Theme
+
+The report uses the trinary-agents dashboard palette. `report-theme.css` holds
+a dark and a light token block; edit colours there, not in the renderer. The
+page opens in the viewer's saved choice, otherwise their system preference,
+otherwise dark. The toggle button in the header switches `data-theme` on
+`<html>` and remembers the choice in the browser's `localStorage` under
+`trinary-rapid-theme`. Printing hides the toggle.
 
 ## Inputs
 
@@ -84,12 +94,13 @@ report status `Reported`, the `| None | - | - |` row, and severities
 ## Layout
 
 - Title `Trinary-RAPID Report :: <Project Name> :: RF-XXXX <title>`.
-- Header card with the feature ID and title, a large colored `RESULT:` badge
-  (green `DELIVERED`, amber `PARTIAL`, red `NOT_DELIVERED`), `Not
-  independently reviewed.` when review was not independent, and the branch,
-  plan approval time, report time, review, reviewer, and status.
+- Header with the feature ID and title, the theme toggle button, a large
+  colored `RESULT:` badge (green `DELIVERED`, amber `PARTIAL`, red
+  `NOT_DELIVERED`), `Not independently reviewed.` when review was not
+  independent, and the branch, plan approval time, report time, review,
+  reviewer, and status.
 - A collapsed `Plan:` section holding the plan's Goal, Scope, and Decisions.
-- One card per report section, in template order. Acceptance check results
+- One panel per report section, in template order. Acceptance check results
   and pending issue severities are shown as badges.
 - The DaisyUI license notice as an HTML comment at the end of the page.
 

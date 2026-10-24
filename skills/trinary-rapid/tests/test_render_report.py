@@ -82,6 +82,26 @@ class ValidReportTests(unittest.TestCase):
         self.assertIn("Permission is hereby granted, free of charge", page)
         self.assertIn(renderer.MARKER, page)
 
+    def test_page_embeds_report_theme_with_both_palettes(self):
+        page = self.render_template()
+        match = re.search(r'<style id="report-theme">(.*?)</style>', page, re.S)
+        self.assertIsNotNone(match)
+        theme = match.group(1)
+        self.assertIn(':root[data-theme="dark"]', theme)
+        self.assertIn(':root[data-theme="light"]', theme)
+        self.assertLess(page.index('id="daisyui-styles"'), page.index('id="report-theme"'))
+        self.assertIn('<html lang="en" data-theme="dark">', page)
+
+    def test_page_has_theme_toggle_button(self):
+        page = self.render_template()
+        self.assertIn('<button id="theme-toggle"', page)
+        self.assertIn('type="button"', page)
+        script = re.search(r"<script>(.*?)</script>", page, re.S).group(1)
+        self.assertIn('getElementById("theme-toggle")', script)
+        self.assertIn(renderer.THEME_STORAGE_KEY, script)
+        self.assertIn("localStorage", script)
+        self.assertNotIn("</", script)
+
     def test_result_badge_and_every_section(self):
         page = self.render_template()
         self.assertIn('id="result-badge">RESULT: DELIVERED</span>', page)
@@ -110,7 +130,9 @@ class ValidReportTests(unittest.TestCase):
         self.assertIsNone(re.search(r"\b(?:src|href|srcset|action)\s*=", page, re.I))
         self.assertIsNone(re.search(r"url\(\s*[\"']?https?:", page, re.I))
         self.assertIsNone(re.search(r"@import", page, re.I))
-        self.assertIsNone(re.search(r"<(?:script|link|img|iframe|object|embed)\b", page, re.I))
+        self.assertIsNone(re.search(r"<(?:link|img|iframe|object|embed)\b", page, re.I))
+        # The only script is the inline theme toggle, with no attributes.
+        self.assertEqual(re.findall(r"<script\b[^>]*>", page, re.I), ["<script>"])
         # The only http(s) strings are XML namespace identifiers inside the
         # stylesheet's inline data: SVGs; outside the stylesheet there are none.
         self.assertLessEqual(set(re.findall(r"https?://[^\s'\"%)]+", page)), NAMESPACE_URIS)
@@ -130,7 +152,8 @@ class ValidReportTests(unittest.TestCase):
         self.assertIn("<code>&lt;img src=x&gt;</code>", page)
         self.assertIn("Fix &lt;b&gt;&quot;bold&quot;&lt;/b&gt; &amp; more", page)
         self.assertIn("&lt;iframe&gt;State the outcome", page)
-        self.assertIsNone(re.search(r"<(?:script|img|iframe)\b", page))
+        without_theme_script = re.sub(r"<script>.*?</script>", "", page, count=1, flags=re.S)
+        self.assertIsNone(re.search(r"<(?:script|img|iframe)\b", without_theme_script))
 
     def test_markdown_subset(self):
         report = REPORT_TEMPLATE.replace(

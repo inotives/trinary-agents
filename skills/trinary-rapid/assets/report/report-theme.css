@@ -1,0 +1,123 @@
+/* Trinary-RAPID report theme.
+ *
+ * Embedded into every report.html after the DaisyUI stylesheet. The palette
+ * follows the trinary-agents feature dashboard. Change colours only in the two
+ * token blocks below; the component rules underneath read the tokens, and the
+ * DaisyUI base colours are mapped onto them so badges, tables, and checkboxes
+ * follow the active theme. The page's toggle button switches
+ * <html data-theme> between "dark" and "light".
+ */
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --rr-page: #070b14;
+  --rr-glow-a: rgba(8, 145, 178, .17);
+  --rr-glow-b: rgba(109, 40, 217, .16);
+  --rr-panel-from: rgba(17, 28, 46, .94);
+  --rr-panel-to: rgba(10, 17, 30, .94);
+  --rr-panel-shadow: 0 12px 35px rgba(0, 0, 0, .2), inset 0 1px rgba(255, 255, 255, .035);
+  --rr-inset: rgba(5, 12, 23, .55);
+  --rr-border: rgba(115, 151, 192, .22);
+  --rr-divider: rgba(125, 161, 203, .16);
+  --rr-text: #e5eefb;
+  --rr-heading: #f1f5f9;
+  --rr-muted: #a9bdd4;
+  --rr-faint: #8da2bb;
+  --rr-accent: #67e8f9;
+  --rr-accent-strong: #a5f3fc;
+  --rr-accent-soft: rgba(8, 145, 178, .13);
+  --rr-accent-border: rgba(103, 232, 249, .3);
+  --color-base-100: #111c2e;
+  --color-base-200: #0b1424;
+  --color-base-300: #1c2a40;
+  --color-base-content: #e5eefb;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --rr-page: #f3f6fb;
+  --rr-glow-a: rgba(8, 145, 178, .10);
+  --rr-glow-b: rgba(109, 40, 217, .07);
+  --rr-panel-from: rgba(255, 255, 255, .97);
+  --rr-panel-to: rgba(246, 249, 253, .97);
+  --rr-panel-shadow: 0 10px 28px rgba(15, 23, 42, .07), inset 0 1px rgba(255, 255, 255, .8);
+  --rr-inset: rgba(226, 234, 244, .6);
+  --rr-border: rgba(71, 98, 133, .2);
+  --rr-divider: rgba(71, 98, 133, .14);
+  --rr-text: #1e293b;
+  --rr-heading: #0f172a;
+  --rr-muted: #475569;
+  --rr-faint: #64748b;
+  --rr-accent: #0e7490;
+  --rr-accent-strong: #155e75;
+  --rr-accent-soft: rgba(8, 145, 178, .09);
+  --rr-accent-border: rgba(14, 116, 144, .3);
+  --color-base-100: #ffffff;
+  --color-base-200: #eef2f8;
+  --color-base-300: #dbe3ee;
+  --color-base-content: #1e293b;
+}
+
+/* Page */
+body { margin: 0; min-height: 100vh; color: var(--rr-text); background-color: var(--rr-page); background-image: radial-gradient(ellipse at 14% 0%, var(--rr-glow-a), transparent 38%), radial-gradient(ellipse at 90% 10%, var(--rr-glow-b), transparent 34%); background-attachment: fixed; font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.55; }
+main { box-sizing: border-box; max-width: 64rem; margin: 0 auto; padding: clamp(.75rem, 2vw, 1.5rem) 1rem 3rem; display: grid; gap: .9rem; }
+
+/* Header */
+.report-header { display: grid; gap: .85rem; padding: .25rem .25rem 1rem; border-bottom: 1px solid var(--rr-divider); }
+.report-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.kicker { margin: 0 0 .15rem; color: var(--rr-accent); font: 700 .68rem/1.3 ui-monospace, SFMono-Regular, monospace; letter-spacing: .16em; text-transform: uppercase; }
+.report-header h1 { margin: 0; color: var(--rr-heading); font-size: clamp(1.3rem, 2.4vw, 1.8rem); line-height: 1.2; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.hero { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; }
+.hero .badge { font: 700 .95rem/1 ui-monospace, SFMono-Regular, monospace; padding: .9rem 1.1rem; letter-spacing: .04em; }
+.review-note { margin: 0; color: var(--rr-muted); font-weight: 600; font-size: .85rem; }
+dl.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); gap: .5rem; margin: 0; }
+dl.meta > div { padding: .5rem .7rem; border: 1px solid var(--rr-border); border-radius: .72rem; background: linear-gradient(130deg, var(--rr-panel-from), var(--rr-panel-to)); }
+dl.meta dt { color: var(--rr-faint); font-size: .66rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+dl.meta dd { margin: .1rem 0 0; color: var(--rr-heading); font: 600 .78rem/1.35 ui-monospace, SFMono-Regular, monospace; overflow-wrap: anywhere; }
+
+/* Theme toggle */
+.theme-toggle { flex: 0 0 auto; color: var(--rr-accent-strong); border: 1px solid var(--rr-border); }
+.theme-toggle:hover { border-color: var(--rr-accent-border); background: var(--rr-accent-soft); }
+.theme-icon { display: block; width: 1.1rem; height: 1.1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+:root[data-theme="dark"] .theme-icon-moon, :root[data-theme="light"] .theme-icon-sun { display: none; }
+
+/* Panels: report sections and the collapsible plan */
+.panel { border: 1px solid var(--rr-border); border-radius: 1rem; background: linear-gradient(145deg, var(--rr-panel-from), var(--rr-panel-to)); box-shadow: var(--rr-panel-shadow); color: var(--rr-text); }
+.panel .card-body { padding: 0; gap: 0; }
+.panel .card-title { display: flex; align-items: center; gap: .5rem; margin: 0; padding: .65rem .95rem; border-bottom: 1px solid var(--rr-divider); color: var(--rr-heading); font-size: .82rem; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+.panel .card-title::before { content: ""; width: .45rem; height: .45rem; border-radius: 999px; background: var(--rr-accent); box-shadow: 0 0 10px var(--rr-accent); }
+.section-content { padding: .75rem .95rem .9rem; }
+.plan .collapse-title { color: var(--rr-heading); font-size: .82rem; letter-spacing: .07em; text-transform: uppercase; }
+.plan .collapse-content { border-top: 1px solid var(--rr-divider); }
+
+/* Content */
+.report-section h3, .report-section h4, .plan h3, .plan h4 { margin: .85rem 0 .3rem; color: var(--rr-accent-strong); font-size: .8rem; font-weight: 700; letter-spacing: .05em; }
+.report-section p, .plan p { margin: .3rem 0; }
+.report-section ul, .report-section ol, .plan ul, .plan ol { margin: .3rem 0; padding-left: 1.5rem; }
+ul { list-style: disc; } ol { list-style: decimal; }
+li::marker { color: var(--rr-accent); }
+li.task-item { list-style: none; margin-left: -1.5rem; display: flex; gap: .5rem; align-items: baseline; }
+code { color: var(--rr-accent-strong); font-family: ui-monospace, SFMono-Regular, monospace; font-size: .86em; background: var(--rr-accent-soft); border: 1px solid var(--rr-divider); padding: .03rem .3rem; border-radius: .3rem; overflow-wrap: anywhere; }
+pre.code-block { background: var(--rr-inset); border: 1px solid var(--rr-divider); padding: .75rem; border-radius: .6rem; overflow-x: auto; }
+pre.code-block code { color: var(--rr-text); background: none; border: 0; padding: 0; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--rr-divider); border-radius: .72rem; background: var(--rr-inset); }
+.table-wrap .table { font-size: .8rem; }
+.table-wrap thead th { color: var(--rr-muted); font-size: .66rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--rr-divider); }
+.table-wrap td { vertical-align: top; overflow-wrap: anywhere; }
+.badge { font-family: ui-monospace, SFMono-Regular, monospace; font-weight: 700; }
+.link-target { color: var(--rr-faint); font-size: .9em; }
+.result-line { margin: 0 0 .4rem; font-weight: 600; }
+
+/* Footer */
+footer { color: var(--rr-faint); font-size: .7rem; text-align: center; }
+
+@media (max-width: 480px) {
+  .report-header-top { gap: .5rem; }
+  dl.meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media print {
+  body { background-image: none; }
+  .theme-toggle { display: none; }
+  .panel { box-shadow: none; break-inside: avoid; }
+}
