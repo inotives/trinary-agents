@@ -194,8 +194,9 @@ Trinary Rapid is a lightweight companion to Trinary Agents for small,
 well-bounded features and fixes. Use it when the change fits in about five
 steps and does not span many modules: the agent runs an interview capped at
 two rounds, gets one plan approval, implements the plan itself (with optional
-subagents for independent steps), runs one independent review, and writes a
-report. There are no task folders, per-task handoffs, or dashboards. Use the
+subagents for independent steps), runs one independent review, writes a
+report, and asks the human to accept the result. There are no task folders,
+per-task handoffs, or dashboards. Use the
 full Trinary Agents workflow for multi-module work, longer plans, questions
 still open after the interview, or when you want a dependency-tracked
 project-manager, worker, and reviewer loop. Rapid recommends switching when
@@ -213,15 +214,23 @@ trinary-workspace/rapid/RF-XXXX--<slug>/
 The report's Outcome section opens with a single `RESULT:` line,
 `RESULT: DELIVERED`, `RESULT: PARTIAL`, or `RESULT: NOT_DELIVERED`, followed
 by acceptance check results, changes, findings, review, pending issues, and
-completed steps. Out-of-scope pending issues go to the shared
+completed steps. Each pending issue has a Type such as `bug:high` or
+`idea:low`; out-of-scope pending issues go to the shared
 `trinary-workspace/backlog/`.
+
+Plan statuses match Trinary Agents feature plans: `Draft`, `Approved`,
+`Implementing`, `Awaiting Human Acceptance`, and `Accepted`. The report's
+status mirrors the plan's. After the report is committed, only the human's
+explicit acceptance sets `Accepted`, recorded in a final acceptance commit;
+requested changes return the plan to `Implementing`.
 
 The skill's renderer validates `report.md` against the template and writes a
 self-contained `report.html` with an embedded stylesheet and no network
 requests. It requires Python 3 and uses only the standard library. If Python 3
 is unavailable, `report.md` remains the deliverable. When `trinary-workspace/`
 is ignored by Git, rapid does not force-add it: it commits only the
-implementation files and tells the human where the plan and report are. See
+implementation files, tells the human where the plan and report are, and has
+nothing to commit at acceptance. See
 the skill's [`SKILL.md`](skills/trinary-rapid/SKILL.md) and
 [report reference](skills/trinary-rapid/references/report.md).
 

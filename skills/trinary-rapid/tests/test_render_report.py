@@ -109,7 +109,8 @@ class ValidReportTests(unittest.TestCase):
         for heading in REPORT_SECTIONS:
             self.assertIn(f'<h2 class="card-title">{heading}</h2>', page)
         self.assertIn('<span class="badge badge-success">passed</span>', page)
-        self.assertIn('<span class="badge badge-warning">medium</span>', page)
+        self.assertIn('<span class="badge badge-warning">bug:medium</span>', page)
+        self.assertIn("<dd>Awaiting Human Acceptance</dd>", page)
         self.assertIn("<code>path/to/file</code>", page)
 
     def test_plan_goal_scope_and_decisions_are_embedded_collapsibly(self):
@@ -184,10 +185,24 @@ class ValidReportTests(unittest.TestCase):
 
     def test_no_pending_issues_row(self):
         report = REPORT_TEMPLATE.replace(
-            "| Describe each unresolved or out-of-scope issue | medium | BL-0001 |", "| None | - | - |"
+            "| Describe each unresolved or out-of-scope issue | bug:medium | BL-0001 |", "| None | - | - |"
         )
         page = self.render_template(report=report)
         self.assertIn("<td>None</td><td>-</td><td>-</td>", page)
+
+    def test_accepted_status_renders(self):
+        page = self.render_template(report=set_key(REPORT_TEMPLATE, "status", "Accepted"))
+        self.assertIn("<dd>Accepted</dd>", page)
+
+    def test_issue_types_render_as_severity_badges(self):
+        row = "| Describe each unresolved or out-of-scope issue | bug:medium | BL-0001 |"
+        expected = {"low": "badge-info", "medium": "badge-warning", "high": "badge-error"}
+        for kind in ("bug", "idea"):
+            for severity, css in expected.items():
+                value = f"{kind}:{severity}"
+                with self.subTest(value=value):
+                    page = self.render_template(report=REPORT_TEMPLATE.replace(row, f"| Issue | {value} | - |"))
+                    self.assertIn(f'<span class="badge {css}">{value}</span>', page)
 
     def test_partial_and_not_delivered_results(self):
         partial = REPORT_TEMPLATE.replace("RESULT: DELIVERED\n", "RESULT: PARTIAL\n").replace(
@@ -297,8 +312,14 @@ class RefusalTests(unittest.TestCase):
         skipped = re.sub(r"(## Review\n).*?(?=## Pending)", r"\1\n- Reviewer: none.\n\n", skipped, flags=re.S)
         self.refuse_report(skipped, "## Review must state 'Not independently reviewed.' when review is skipped")
 
+    def test_template_mirrors_awaiting_acceptance_with_independent_review(self):
+        self.assertRegex(REPORT_TEMPLATE, r"(?m)^status: Awaiting Human Acceptance$")
+        self.assertRegex(REPORT_TEMPLATE, r"(?m)^review: independent$")
+
     def test_invalid_status_and_id(self):
         self.refuse_report(set_key(REPORT_TEMPLATE, "status", "Done"), "invalid status 'Done'")
+        self.refuse_report(set_key(REPORT_TEMPLATE, "status", "Reported"), "invalid status 'Reported'")
+        self.refuse_report(set_key(REPORT_TEMPLATE, "status", "Implementing"), "invalid status 'Implementing'")
         self.refuse_report(set_key(REPORT_TEMPLATE, "id", "RF-1"), "invalid id 'RF-1'")
 
     def test_invalid_check_result(self):
@@ -308,7 +329,7 @@ class RefusalTests(unittest.TestCase):
     def test_table_headers_must_match(self):
         report = REPORT_TEMPLATE.replace("| Check | Command / method |", "| Check | Command |")
         self.refuse_report(report, "## Acceptance checks table header must be exactly")
-        report = REPORT_TEMPLATE.replace("| Issue | Severity | Backlog |", "| Issue | Priority | Backlog |")
+        report = REPORT_TEMPLATE.replace("| Issue | Type | Backlog |", "| Issue | Severity | Backlog |")
         self.refuse_report(report, "## Pending issues table header must be exactly")
 
     def test_missing_table_and_wrong_cell_count(self):
@@ -324,9 +345,11 @@ class RefusalTests(unittest.TestCase):
         self.refuse_report(report, "RESULT: NOT_DELIVERED is required when no acceptance check passed")
 
     def test_pending_issue_rules(self):
-        row = "| Describe each unresolved or out-of-scope issue | medium | BL-0001 |"
-        self.refuse_report(REPORT_TEMPLATE.replace(row, "| Bug | urgent | - |"), "invalid severity 'urgent'")
-        self.refuse_report(REPORT_TEMPLATE.replace(row, "| Bug | low | 42 |"), "invalid backlog '42'")
+        row = "| Describe each unresolved or out-of-scope issue | bug:medium | BL-0001 |"
+        for value in ("medium", "bug", "bug:urgent", "task:high", "Bug:High", "bug: high", "bug:high:x"):
+            with self.subTest(value=value):
+                self.refuse_report(REPORT_TEMPLATE.replace(row, f"| Bug | {value} | - |"), f"invalid type {value!r}")
+        self.refuse_report(REPORT_TEMPLATE.replace(row, "| Bug | bug:low | 42 |"), "invalid backlog '42'")
         self.refuse_report(
             REPORT_TEMPLATE.replace(row, row + "\n| None | - | - |"), "row must be the only row"
         )

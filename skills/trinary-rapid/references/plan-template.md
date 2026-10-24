@@ -42,3 +42,7 @@ Summarize the request, quoting the human where practical, and the relevant repos
 ## Plan approval
 
 - Record the human's explicit approval and its UTC timestamp.
+
+## Human acceptance
+
+- Record each acceptance decision, or requested change, and its UTC timestamp.

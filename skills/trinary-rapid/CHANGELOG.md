@@ -11,10 +11,13 @@ its GitHub Release notes.
 - Initial release of `trinary-rapid`, a lightweight companion to
   `trinary-agents` for small features: branch, an interview capped at two
   rounds, one plan approval, implementation by the main agent with optional
-  subagents, one independent review, and a templated report.
+  subagents, one independent review, a templated report, and a final human
+  acceptance.
 - Records live in `trinary-workspace/rapid/RF-XXXX--<slug>/` as `README.md`
-  (the plan), `report.md`, and `report.html`, with plan statuses `Draft`,
-  `Approved`, `Implementing`, and `Reported`.
+  (the plan), `report.md`, and `report.html`, with the trinary-agents feature
+  plan statuses `Draft`, `Approved`, `Implementing`,
+  `Awaiting Human Acceptance`, and `Accepted`. The report's `status` mirrors
+  the plan's.
 - Fixed plan and report templates, also shipped as
   `references/plan-template.md` and `references/report-template.md`. The
   report opens with a `RESULT:` line and records acceptance check results,
@@ -22,11 +25,18 @@ its GitHub Release notes.
 - An escalation rule that recommends a full trinary-agents feature plan for
   multi-module work, more than about five steps, or questions still open
   after the second interview round.
-- On finish, the plan's passed acceptance checks are ticked and the plan,
-  report, rendered report, new backlog items, and workspace README changes
-  are committed with the implementation.
-- A resume rule for `Implementing` rapid features based on the step checklist
-  and `git status`/`git diff`.
+- After the report, the plan's passed acceptance checks are ticked and the
+  plan, report, rendered report, new backlog items, and workspace README
+  changes are committed with the implementation.
+- A final human acceptance step: only explicit human acceptance sets
+  `Accepted`, re-renders the report, and records an acceptance commit;
+  requested changes return the plan to `Implementing`. When
+  `trinary-workspace/` is ignored by Git, nothing is committed for it and it
+  is never force-added.
+- Resume rules for every plan status; `Implementing` rapid features resume
+  from the step checklist and `git status`/`git diff`.
+- Pending issues carry a Type `<bug|idea>:<low|medium|high>`, such as
+  `bug:high`, shown as a badge coloured by severity.
 - Shared backlog integration: out-of-scope pending issues become `BL-XXXX`
   items, and a rapid feature may start from a backlog item.
 - Self-verified or skipped reviews are reported as "Not independently

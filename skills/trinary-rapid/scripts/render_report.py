@@ -38,12 +38,15 @@ REVIEW_VALUES = ("independent", "self-verified", "skipped")
 NOT_REVIEWED_SENTENCE = "Not independently reviewed."
 CHECKS_HEADER = ("Check", "Command / method", "Result", "Evidence")
 CHECK_RESULTS = ("passed", "failed", "not run")
-ISSUES_HEADER = ("Issue", "Severity", "Backlog")
+ISSUES_HEADER = ("Issue", "Type", "Backlog")
 
-# Rules below follow the committed template but are pending human
-# confirmation; change them here only.
-REPORT_STATUSES = ("Reported",)
-ISSUE_SEVERITIES = ("high", "medium", "low")
+# Report status mirrors the plan status once the report exists (trinary-agents
+# feature plan statuses): written while awaiting acceptance, then accepted.
+REPORT_STATUSES = ("Awaiting Human Acceptance", "Accepted")
+# Pending issue Type is <kind>:<severity>, for example bug:high.
+ISSUE_KINDS = ("bug", "idea")
+ISSUE_SEVERITIES = ("low", "medium", "high")
+ISSUE_TYPES = tuple(f"{kind}:{severity}" for kind in ISSUE_KINDS for severity in ISSUE_SEVERITIES)
 NO_ISSUES_ROW = ("None", "-", "-")
 BACKLOG_VALUE = re.compile(r"^(?:BL-\d{4}|-)$")
 
@@ -314,10 +317,10 @@ def validate_report(text, problems):
             for number, row in enumerate(rows, start=1):
                 if tuple(row) == tuple(NO_ISSUES_ROW):
                     continue
-                if row[1] not in ISSUE_SEVERITIES:
+                if row[1] not in ISSUE_TYPES:
                     problems.append(
-                        f"{label}: ## Pending issues row {number}: invalid severity {row[1]!r}; "
-                        f"expected one of: {', '.join(ISSUE_SEVERITIES)}"
+                        f"{label}: ## Pending issues row {number}: invalid type {row[1]!r}; "
+                        f"expected <{'|'.join(ISSUE_KINDS)}>:<{'|'.join(ISSUE_SEVERITIES)}>, for example bug:high"
                     )
                 if not BACKLOG_VALUE.match(row[2]):
                     problems.append(
@@ -428,8 +431,16 @@ def plain(text):
     return "".join(out)
 
 
-def badge(value, classes):
-    return f'<span class="badge {classes.get(value, "badge-ghost")}">{escape(value)}</span>'
+def badge(value, classes, key=None):
+    css = classes.get(value if key is None else key, "badge-ghost")
+    return f'<span class="badge {css}">{escape(value)}</span>'
+
+
+def issue_type_badge(value):
+    """Badge for a pending issue Type such as bug:high, coloured by severity."""
+    if value not in ISSUE_TYPES:
+        return inline(value)
+    return badge(value, SEVERITY_BADGES, key=value.split(":", 1)[1])
 
 
 RESULT_BADGES = {"DELIVERED": "badge-success", "PARTIAL": "badge-warning", "NOT_DELIVERED": "badge-error"}
@@ -505,7 +516,7 @@ def render_html(report, plan, project_name):
         elif heading == "Acceptance checks":
             renderers = {2: lambda value: badge(value, CHECK_BADGES)}
         elif heading == "Pending issues":
-            renderers = {1: lambda value: badge(value, SEVERITY_BADGES) if value in ISSUE_SEVERITIES else inline(value)}
+            renderers = {1: issue_type_badge}
         content = render_blocks(parse_blocks(lines), heading_offset=0, cell_renderers=renderers)
         if heading == "Outcome":
             content = (
@@ -535,7 +546,7 @@ def render_html(report, plan, project_name):
     meta = [
         ("Branch", fields["branch"]),
         ("Plan approved", fields["plan_approved_at"]),
-        ("Reported", fields["reported_at"]),
+        ("Report written", fields["reported_at"]),
         ("Review", fields["review"]),
         ("Reviewer", reviewer),
         ("Status", fields["status"]),

@@ -1,7 +1,7 @@
 ---
 id: RF-0001
 title: Example rapid feature
-status: Reported
+status: Awaiting Human Acceptance
 branch: feat/example-rapid-feature
 plan_approved_at: 2026-01-01T00:00:00Z
 reported_at: 2026-01-01T00:00:00Z
@@ -41,9 +41,9 @@ Summarize what was delivered and how it meets the goal in two or three sentences
 
 ## Pending issues
 
-| Issue | Severity | Backlog |
+| Issue | Type | Backlog |
 | --- | --- | --- |
-| Describe each unresolved or out-of-scope issue | medium | BL-0001 |
+| Describe each unresolved or out-of-scope issue | bug:medium | BL-0001 |
 
 ## Steps completed
 

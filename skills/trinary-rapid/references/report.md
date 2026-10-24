@@ -4,7 +4,8 @@
 it, together with the plan, as a read-only `report.html`. The workflow in
 [`SKILL.md`](../SKILL.md) works without it: when Python 3 is unavailable,
 `report.md` is the deliverable. This file describes what the renderer checks
-and produces; agents running the workflow only need step 8 of `SKILL.md`.
+and produces; agents running the workflow only need steps 8 and 10 of
+`SKILL.md`.
 
 ```text
 python3 <skill-dir>/scripts/render_report.py trinary-workspace/rapid/RF-XXXX--<slug>
@@ -55,7 +56,8 @@ Report frontmatter:
   `plan_approved_at`, `reported_at`, `review`, `reviewer`. Only `reviewer` may
   be empty or `null`; keys may not repeat. Extra keys are ignored.
 - `id` matches `RF-XXXX` and equals the plan's `id`.
-- `status` is `Reported`.
+- `status` is `Awaiting Human Acceptance` or `Accepted`, mirroring the plan.
+  Any other value is rejected with the value named.
 - `review` is `independent`, `self-verified`, or `skipped`.
 - `reviewer` names the reviewer when `review: independent`, and is `null`
   when `review` is `self-verified` or `skipped`. In those two cases the
@@ -75,21 +77,21 @@ Report sections:
 - The result agrees with the checks: `DELIVERED` requires every check
   `passed`; when no check passed the result must be `NOT_DELIVERED`.
 - `## Pending issues` contains one table with the header
-  `| Issue | Severity | Backlog |` and at least one row. Severity is `high`,
-  `medium`, or `low`; Backlog is a `BL-XXXX` ID or `-`. With no pending
-  issues the table has the single row `| None | - | - |`.
+  `| Issue | Type | Backlog |` and at least one row. Type is
+  `<bug|idea>:<low|medium|high>`, for example `bug:high` or `idea:low`;
+  Backlog is a `BL-XXXX` ID or `-`. With no pending issues the table has the
+  single row `| None | - | - |`.
 
 Plan: frontmatter `id` and `title`, and the `## Goal`, `## Scope`, and
-`## Decisions` sections, are required.
+`## Decisions` sections, are required. The plan's `status` is not checked.
 
 An existing `report.html` without the renderer's marker comment, or a
 symlinked `report.html`, is never overwritten. The page is written to a
 temporary file in the folder and then moved into place.
 
-The rules that follow the committed template but await human confirmation —
-report status `Reported`, the `| None | - | - |` row, and severities
-`high`/`medium`/`low` — are module constants (`REPORT_STATUSES`,
-`NO_ISSUES_ROW`, `ISSUE_SEVERITIES`) at the top of the script.
+The report statuses, pending issue kinds and severities, and the
+`| None | - | - |` row are module constants (`REPORT_STATUSES`,
+`ISSUE_KINDS`, `ISSUE_SEVERITIES`, `NO_ISSUES_ROW`) at the top of the script.
 
 ## Layout
 
@@ -101,7 +103,9 @@ report status `Reported`, the `| None | - | - |` row, and severities
   reviewer, and status.
 - A collapsed `Plan:` section holding the plan's Goal, Scope, and Decisions.
 - One panel per report section, in template order. Acceptance check results
-  and pending issue severities are shown as badges.
+  and pending issue types are shown as badges; a type badge shows the full
+  value, such as `bug:high`, coloured by its severity (`high` as error,
+  `medium` as warning, `low` as info).
 - The DaisyUI license notice as an HTML comment at the end of the page.
 
 ## Markdown subset

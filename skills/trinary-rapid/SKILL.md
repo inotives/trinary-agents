@@ -1,11 +1,11 @@
 ---
 name: trinary-rapid
-description: Deliver a small, well-bounded feature or fix fast with a predictable outcome — a short interview (at most two rounds), one plan approval, implementation by the main agent with optional subagents, one independent review, and a templated report rendered to HTML, kept in trinary-workspace/rapid/. Use when the human asks for a rapid or lightweight trinary feature, wants something done quickly without per-task handoffs, or wants to resume a rapid feature. For multi-module work, more than about five steps, or a dependency-tracked PM/worker/reviewer loop, use the full trinary-agents workflow instead.
+description: Deliver a small, well-bounded feature or fix fast with a predictable outcome — a short interview (at most two rounds), one plan approval, implementation by the main agent with optional subagents, one independent review, a templated report rendered to HTML, and a final human acceptance, kept in trinary-workspace/rapid/. Use when the human asks for a rapid or lightweight trinary feature, wants something done quickly without per-task handoffs, or wants to resume a rapid feature. For multi-module work, more than about five steps, or a dependency-tracked PM/worker/reviewer loop, use the full trinary-agents workflow instead.
 ---
 
 # Trinary Rapid
 
-Deliver a small feature as one approved plan, one implementation pass, one independent review, and one report. Predictability comes from a decision-complete interview and acceptance checks agreed up front, not from per-task handoffs. Keep the durable record in the target repository's root-level `trinary-workspace/rapid/` directory.
+Deliver a small feature as one approved plan, one implementation pass, one independent review, one report, and one human acceptance. Predictability comes from a decision-complete interview and acceptance checks agreed up front, not from per-task handoffs. Keep the durable record in the target repository's root-level `trinary-workspace/rapid/` directory.
 
 ## Operating rules
 
@@ -88,13 +88,17 @@ Summarize the request, quoting the human where practical, and the relevant repos
 ## Plan approval
 
 - Record the human's explicit approval and its UTC timestamp.
+
+## Human acceptance
+
+- Record each acceptance decision, or requested change, and its UTC timestamp.
 ```
 
-Steps are small, verifiable, and ordered. Each acceptance check states how it is verified, with a command where possible. The plan stays `Draft` until approved; until then, write `Pending` under Plan approval.
+Steps are small, verifiable, and ordered. Each acceptance check states how it is verified, with a command where possible. The plan stays `Draft` until approved; until then, write `Pending` under Plan approval. Write `Pending` under Human acceptance until step 10.
 
 ### 5. Get approval and commit the plan
 
-Present the plan for review. This is the only approval gate: there are no per-step approvals and no separate acceptance step. Do not change project files until the human explicitly approves. Record the approval with its UTC timestamp under Plan approval, set `status: Approved`, and commit the plan, the workspace README if you created or changed it, and the promoted backlog item, if any, on the feature branch. This is the plan commit. If `trinary-workspace/` is ignored by Git, do not force-add it; tell the human and record that in Decisions.
+Present the plan for review. This is the only approval before implementation: there are no per-step approvals, and the human accepts the result in step 10. Do not change project files until the human explicitly approves. Record the approval with its UTC timestamp under Plan approval, set `status: Approved`, and commit the plan, the workspace README if you created or changed it, and the promoted backlog item, if any, on the feature branch. This is the plan commit. If `trinary-workspace/` is ignored by Git, do not force-add it; tell the human and record that in Decisions.
 
 If the approved plan must change materially later, stop, explain the change, update the plan, and get approval again before continuing; record the change in Decisions and the new approval under Plan approval.
 
@@ -116,13 +120,13 @@ When the review is done, record in the plan's Decisions who reviewed and when, o
 
 ### 8. Write and render the report
 
-Write `report.md` in the rapid feature folder from this template. Keep the frontmatter keys, section names, order, and table columns exactly; a renderer validates them.
+Set the plan's `status: Awaiting Human Acceptance` and tick each plan acceptance check that passed. Write `report.md` in the rapid feature folder from this template; its `status` mirrors the plan. Keep the frontmatter keys, section names, order, and table columns exactly; a renderer validates them.
 
 ```markdown
 ---
 id: RF-0001
 title: Example rapid feature
-status: Reported
+status: Awaiting Human Acceptance
 branch: feat/example-rapid-feature
 plan_approved_at: 2026-01-01T00:00:00Z
 reported_at: 2026-01-01T00:00:00Z
@@ -162,9 +166,9 @@ Summarize what was delivered and how it meets the goal in two or three sentences
 
 ## Pending issues
 
-| Issue | Severity | Backlog |
+| Issue | Type | Backlog |
 | --- | --- | --- |
-| Describe each unresolved or out-of-scope issue | medium | BL-0001 |
+| Describe each unresolved or out-of-scope issue | bug:medium | BL-0001 |
 
 ## Steps completed
 
@@ -175,7 +179,8 @@ Summarize what was delivered and how it meets the goal in two or three sentences
 - Acceptance checks has one row per plan check; Result is `passed`, `failed`, or `not run`. Write a literal `|` inside a table cell as `\|`.
 - Changes lists every changed file with a one-line description.
 - `review` is `independent`, `self-verified`, or `skipped`; `reviewer` names the reviewing subagent when `review: independent`, and is `null` when `review` is `self-verified` or `skipped`.
-- Pending issues uses severity `high`, `medium`, or `low`. Capture each out-of-scope issue as a backlog item and put its ID in Backlog; write `-` for issues not captured. With no pending issues, keep the table with a single row `| None | - | - |`.
+- `status` is `Awaiting Human Acceptance` when the report is written and `Accepted` after step 10.
+- Pending issues Type is `<bug|idea>:<low|medium|high>`, for example `bug:high`: `bug` for a defect, `idea` for new behavior, then its severity. Capture each out-of-scope issue as a backlog item and put its ID in Backlog; write `-` for issues not captured. With no pending issues, keep the table with a single row `| None | - | - |`.
 - Steps completed copies the plan's checklist with its notes.
 
 Render the HTML report with the skill's renderer:
@@ -186,9 +191,15 @@ python3 <skill-dir>/scripts/render_report.py trinary-workspace/rapid/RF-XXXX--<s
 
 Resolve `<skill-dir>` as the directory that contains this `SKILL.md`, not the project root; harnesses install skills in different locations (for example `.claude/skills/trinary-rapid/` or `.agents/skills/trinary-rapid/`). The renderer writes `report.html` beside `report.md`, embedding its stylesheet and the plan's goal, scope, and decisions; it makes no network requests. If it refuses, it names each missing or invalid item; fix `report.md` and rerun. [references/report.md](references/report.md) lists every rule it checks. If Python 3 is unavailable, tell the human and continue: `report.md` is the deliverable.
 
-### 9. Finish
+### 9. Commit and present the report
 
-Set the plan's `status: Reported`, tick each plan acceptance check that passed, and commit the implementation, plan, `report.md`, `report.html`, any new backlog items, and any workspace README change together. If `trinary-workspace/` is ignored by Git, do not force-add it: commit only the implementation files and tell the human where the plan and report are. Give the human the outcome line, the report paths, and the pending issues. The report ends the flow. Later changes are a new rapid feature or follow-up run. Do not push or merge unless asked.
+Commit the implementation, plan, `report.md`, `report.html`, any new backlog items, and any workspace README change together. This is the implementation commit. If `trinary-workspace/` is ignored by Git, do not force-add it: commit only the implementation files and tell the human where the plan and report are. Give the human the outcome line, the report paths, and the pending issues, and ask them to accept the result or request changes. Do not push or merge unless asked.
+
+### 10. Get human acceptance
+
+Only explicit human acceptance sets `Accepted`; a finished report is not acceptance. Record the decision and its UTC timestamp under the plan's Human acceptance, set `status: Accepted` in both the plan and `report.md`, and rerun the renderer. Capture limitations the human wants to keep as backlog items. Commit the plan, `report.md`, the re-rendered `report.html`, those backlog items, and any workspace README change on the feature branch. This is the acceptance commit. If `trinary-workspace/` is ignored by Git, there is nothing to commit; do not force-add it.
+
+If the human requests changes, record the request under Human acceptance, set the plan's `status: Implementing`, and treat a material change as a plan change (step 5). Then continue from step 6 for the new or changed steps, review the changes (step 7), update and re-render the report with `status: Awaiting Human Acceptance` (step 8), commit (step 9), and ask for acceptance again. Later changes after acceptance are a new rapid feature or follow-up run.
 
 ## Backlog
 
@@ -242,10 +253,10 @@ For `type: bug` only; remove this section for ideas.
 
 Rebuild state from the plan and the repository, not from earlier chat context.
 
-1. Read the plan's `status` and confirm the current branch matches its `branch`. If it is `Draft`, resume the interview or approval. If it is `Approved`, start step 6. If it is `Reported`, the flow is finished; treat new requests as a new rapid feature or follow-up run.
+1. Read the plan's `status` and confirm the current branch matches its `branch`. If it is `Draft`, resume the interview or approval. If it is `Approved`, start step 6. If it is `Awaiting Human Acceptance`, confirm the report and implementation are committed (step 9), then resume step 10. If it is `Accepted`, the flow is finished; treat new requests as a new rapid feature or follow-up run.
 2. If it is `Implementing`, read the Steps checklist and inspect `git status` and `git diff` (and `git log` since the plan commit, or the branch point when the workspace is not committed).
-3. Report what you found to the human: ticked steps, uncommitted changes, and any step that looks partially done. Verify partial work from the diff rather than guessing; finish or correct it, then continue from the first unticked step. If every step is ticked, continue with step 7 if no review is recorded in Decisions, otherwise with step 8; if `report.md` exists, re-validate and re-render it.
+3. Report what you found to the human: ticked steps, uncommitted changes, and any step that looks partially done. Verify partial work from the diff rather than guessing; finish or correct it, then continue from the first unticked step. If every step is ticked, continue with step 7 if no review is recorded in Decisions, otherwise with step 8; if `report.md` exists, update, re-validate, and re-render it. If Human acceptance records requested changes, continue the change-request path in step 10.
 
 ## Status reference
 
-`Draft` (interviewing and writing the plan) → `Approved` (human approved; plan committed) → `Implementing` (steps and review in progress) → `Reported` (report written and committed with the implementation). The agent sets each status in the plan's frontmatter; only explicit human approval moves `Draft` to `Approved`.
+Plan statuses match trinary-agents feature plans: `Draft` (interviewing and writing the plan) → `Approved` (human approved; plan committed) → `Implementing` (steps and review in progress) → `Awaiting Human Acceptance` (report written and committed with the implementation) → `Accepted` (human accepted; acceptance committed). Requested changes during acceptance return the plan to `Implementing`. The agent sets each status in the plan's frontmatter; only explicit human approval moves `Draft` to `Approved`, and `Accepted` requires explicit human acceptance. Once the report exists, its `status` mirrors the plan's: `Awaiting Human Acceptance`, then `Accepted`. After a change request the report keeps `Awaiting Human Acceptance` until step 8 rewrites it.
