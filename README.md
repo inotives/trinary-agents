@@ -76,6 +76,7 @@ that skill's `VERSION`; GitHub checks this before allowing the merge. See the
 | Skill | What it does |
 | --- | --- |
 | [Trinary Agents](skills/trinary-agents/SKILL.md) | Plan feature work, track dependencies, coordinate implementation and independent review, and preserve decisions in Markdown handoffs. |
+| [Trinary Rapid](skills/trinary-rapid/SKILL.md) | Deliver a small, well-bounded feature or fix fast: a short interview, one plan approval, one independent review, a templated report rendered to HTML, and a final human acceptance. |
 | [Trinary Workspace Backup](skills/trinary-workspace-backup/SKILL.md) | Back up, verify, and restore `trinary-workspace/` through a connected Google Drive integration. |
 
 Download the latest ZIP releases from the
@@ -91,6 +92,16 @@ npx skills add inotives/trinary-agents --skill trinary-agents --agent codex
 
 # Claude Code (installs to .claude/skills/trinary-agents/)
 npx skills add inotives/trinary-agents --skill trinary-agents --agent claude-code
+```
+
+To install Trinary Rapid, use the same commands with `--skill trinary-rapid`:
+
+```sh
+# Codex
+npx skills add inotives/trinary-agents --skill trinary-rapid --agent codex
+
+# Claude Code (installs to .claude/skills/trinary-rapid/)
+npx skills add inotives/trinary-agents --skill trinary-rapid --agent claude-code
 ```
 
 For the Claude app (not Claude Code), download the skill ZIP from GitHub
@@ -177,6 +188,56 @@ with its role, recipient, outcome, and summary. Regenerate the dashboard after
 task status or dependency changes and after adding or changing a timestamped
 handoff. The task READMEs and handoff files remain the full, canonical record.
 
+## Trinary Rapid
+
+Trinary Rapid is a lightweight companion to Trinary Agents for small,
+well-bounded features and fixes. Use it when the change fits in about five
+steps and does not span many modules: the agent runs an interview capped at
+two rounds, gets one plan approval, implements the plan itself (with optional
+subagents for independent steps), runs one independent review, writes a
+report, and asks the human to accept the result. There are no task folders,
+per-task handoffs, or dashboards. Use the
+full Trinary Agents workflow for multi-module work, longer plans, questions
+still open after the interview, or when you want a dependency-tracked
+project-manager, worker, and reviewer loop. Rapid recommends switching when
+one of those conditions applies; the human decides.
+
+Each rapid feature lives in its own folder in the shared workspace:
+
+```text
+trinary-workspace/rapid/RF-XXXX--<slug>/
+├── README.md     # the plan: scope, decisions, acceptance checks, step checklist
+├── report.md     # the report, written from a fixed template
+└── report.html   # the rendered report
+```
+
+The report's Outcome section opens with a single `RESULT:` line,
+`RESULT: DELIVERED`, `RESULT: PARTIAL`, or `RESULT: NOT_DELIVERED`, followed
+by acceptance check results, changes, findings, review, pending issues, and
+completed steps. Each pending issue has a Type such as `bug:high` or
+`idea:low`; out-of-scope pending issues go to the shared
+`trinary-workspace/backlog/`.
+
+Plan statuses match Trinary Agents feature plans: `Draft`, `Approved`,
+`Implementing`, `Awaiting Human Acceptance`, and `Accepted`. The report's
+status mirrors the plan's. After the report is committed, only the human's
+explicit acceptance sets `Accepted`, recorded in a final acceptance commit;
+requested changes return the plan to `Implementing`.
+
+The skill's renderer validates `report.md` against the template and writes a
+self-contained `report.html` with an embedded stylesheet and no network
+requests. The page uses the Trinary Agents dashboard palette in dark and light
+themes, with a header button to switch between them; the palette lives in
+`assets/report/report-theme.css`. It requires Python 3 and uses only the
+standard library. If Python 3 is unavailable, `report.md` remains the
+deliverable. When `trinary-workspace/`
+is ignored by Git, rapid commits none of its records (plan, report, backlog
+items) unless the human asks for specific files, such as backlog items, to be
+committed; it commits the implementation files and tells the human where the
+plan and report are. See
+the skill's [`SKILL.md`](skills/trinary-rapid/SKILL.md) and
+[report reference](skills/trinary-rapid/references/report.md).
+
 ## Optional Supporting Skills and Tools
 
 The core workflow works with ordinary Markdown and the repository tools already
@@ -208,10 +269,11 @@ The Trinary Agents workflow stores its backlog, feature plans, task briefs, and
 handoffs in a `trinary-workspace/` directory at the target project's repository
 root. Backlog items capture ideas, bugs, and review follow-ups, hold the discussion
 that shapes them, and are promoted into a new feature plan when the human
-chooses one. The
-skill's `SKILL.md` defines its structure and rules. Workspace records are
-project data and are not included in this repository; the directory is ignored
-by this repo's `.gitignore`.
+chooses one. Trinary Rapid keeps its features in `trinary-workspace/rapid/`,
+one folder per feature holding the plan, `report.md`, and `report.html`, and
+shares the same backlog. Each skill's `SKILL.md` defines its structure and
+rules. Workspace records are project data and are not included in this
+repository; the directory is ignored by this repo's `.gitignore`.
 
 ## Development Principles
 
