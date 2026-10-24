@@ -31,8 +31,8 @@ its GitHub Release notes.
 - A final human acceptance step: only explicit human acceptance sets
   `Accepted`, re-renders the report, and records an acceptance commit;
   requested changes return the plan to `Implementing`. When
-  `trinary-workspace/` is ignored by Git, nothing is committed for it and it
-  is never force-added.
+  `trinary-workspace/` is ignored by Git, none of its files are committed
+  unless the human asks for specific ones, such as backlog items.
 - Resume rules for every plan status; `Implementing` rapid features resume
   from the step checklist and `git status`/`git diff`.
 - Pending issues carry a Type `<bug|idea>:<low|medium|high>`, such as

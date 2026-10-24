@@ -14,6 +14,7 @@ Deliver a small feature as one approved plan, one implementation pass, one indep
 - Preserve existing files and work. Inspect before creating or changing anything. Never overwrite an existing rapid feature or backlog item.
 - One rapid feature per folder. Its `README.md` is the plan and is canonical for scope, decisions, acceptance checks, and progress. There are no task folders, handoff files, or dashboards. Implementation changes the project's actual source, tests, configuration, and documentation.
 - When committing, stage only the files that belong to the checkpoint. Leave out OS metadata such as `.DS_Store`. Follow the repository's commit message convention; if none exists, use a short imperative subject that names the rapid feature ID, such as `RF-0001: approve plan`.
+- If `trinary-workspace/` is ignored by Git, commit none of its files: the plan, report, rendered report, workspace README, and backlog items stay local. Force-add only the specific workspace files the human explicitly asks to commit, such as backlog items, and record that request in Decisions. Implementation files are committed as usual.
 - Never report self-verified work as independently reviewed.
 - Do not push, merge, or open a pull request unless the human explicitly asks.
 
@@ -98,7 +99,7 @@ Steps are small, verifiable, and ordered. Each acceptance check states how it is
 
 ### 5. Get approval and commit the plan
 
-Present the plan for review. This is the only approval before implementation: there are no per-step approvals, and the human accepts the result in step 10. Do not change project files until the human explicitly approves. Record the approval with its UTC timestamp under Plan approval, set `status: Approved`, and commit the plan, the workspace README if you created or changed it, and the promoted backlog item, if any, on the feature branch. This is the plan commit. If `trinary-workspace/` is ignored by Git, do not force-add it; tell the human and record that in Decisions.
+Present the plan for review. This is the only approval before implementation: there are no per-step approvals, and the human accepts the result in step 10. Do not change project files until the human explicitly approves. Record the approval with its UTC timestamp under Plan approval, set `status: Approved`, and commit the plan, the workspace README if you created or changed it, and the promoted backlog item, if any, on the feature branch. This is the plan commit. If `trinary-workspace/` is ignored by Git, there is nothing to commit unless the human asks for specific files (see Operating rules); tell the human and record that in Decisions.
 
 If the approved plan must change materially later, stop, explain the change, update the plan, and get approval again before continuing; record the change in Decisions and the new approval under Plan approval.
 
@@ -193,11 +194,11 @@ Resolve `<skill-dir>` as the directory that contains this `SKILL.md`, not the pr
 
 ### 9. Commit and present the report
 
-Commit the implementation, plan, `report.md`, `report.html`, any new backlog items, and any workspace README change together. This is the implementation commit. If `trinary-workspace/` is ignored by Git, do not force-add it: commit only the implementation files and tell the human where the plan and report are. Give the human the outcome line, the report paths, and the pending issues, and ask them to accept the result or request changes. Do not push or merge unless asked.
+Commit the implementation, plan, `report.md`, `report.html`, any new backlog items, and any workspace README change together. This is the implementation commit. If `trinary-workspace/` is ignored by Git, commit only the implementation files plus any workspace files the human asked to commit (see Operating rules), and tell the human where the plan and report are. Give the human the outcome line, the report paths, and the pending issues, and ask them to accept the result or request changes. Do not push or merge unless asked.
 
 ### 10. Get human acceptance
 
-Only explicit human acceptance sets `Accepted`; a finished report is not acceptance. Record the decision and its UTC timestamp under the plan's Human acceptance, set `status: Accepted` in both the plan and `report.md`, and rerun the renderer. Capture limitations the human wants to keep as backlog items. Commit the plan, `report.md`, the re-rendered `report.html`, those backlog items, and any workspace README change on the feature branch. This is the acceptance commit. If `trinary-workspace/` is ignored by Git, there is nothing to commit; do not force-add it.
+Only explicit human acceptance sets `Accepted`; a finished report is not acceptance. Record the decision and its UTC timestamp under the plan's Human acceptance, set `status: Accepted` in both the plan and `report.md`, and rerun the renderer. Capture limitations the human wants to keep as backlog items. Commit the plan, `report.md`, the re-rendered `report.html`, those backlog items, and any workspace README change on the feature branch. This is the acceptance commit. If `trinary-workspace/` is ignored by Git, commit only workspace files the human asked to commit (see Operating rules); otherwise there is nothing to commit.
 
 If the human requests changes, record the request under Human acceptance, set the plan's `status: Implementing`, and treat a material change as a plan change (step 5). Then continue from step 6 for the new or changed steps, review the changes (step 7), update and re-render the report with `status: Awaiting Human Acceptance` (step 8), commit (step 9), and ask for acceptance again. Later changes after acceptance are a new rapid feature or follow-up run.
 

@@ -228,9 +228,10 @@ The skill's renderer validates `report.md` against the template and writes a
 self-contained `report.html` with an embedded stylesheet and no network
 requests. It requires Python 3 and uses only the standard library. If Python 3
 is unavailable, `report.md` remains the deliverable. When `trinary-workspace/`
-is ignored by Git, rapid does not force-add it: it commits only the
-implementation files, tells the human where the plan and report are, and has
-nothing to commit at acceptance. See
+is ignored by Git, rapid commits none of its records (plan, report, backlog
+items) unless the human asks for specific files, such as backlog items, to be
+committed; it commits the implementation files and tells the human where the
+plan and report are. See
 the skill's [`SKILL.md`](skills/trinary-rapid/SKILL.md) and
 [report reference](skills/trinary-rapid/references/report.md).
 
