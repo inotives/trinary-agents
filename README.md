@@ -77,6 +77,7 @@ that skill's `VERSION`; GitHub checks this before allowing the merge. See the
 | --- | --- |
 | [Trinary Agents](skills/trinary-agents/SKILL.md) | Plan feature work, track dependencies, coordinate implementation and independent review, and preserve decisions in Markdown handoffs. |
 | [Trinary Rapid](skills/trinary-rapid/SKILL.md) | Deliver a small, well-bounded feature or fix fast: a short interview, one plan approval, one independent review, a templated report rendered to HTML, and a final human acceptance. |
+| [Trinary Tweak](skills/trinary-tweak/SKILL.md) | Iterate on small, ad hoc changes such as UI polish: ask, check, give feedback, repeat, with a checkpoint per kept change and a session record and handoff at the end. |
 | [Trinary Workspace Backup](skills/trinary-workspace-backup/SKILL.md) | Back up, verify, and restore `trinary-workspace/` through a connected Google Drive integration. |
 
 Download the latest ZIP releases from the
@@ -102,6 +103,16 @@ npx skills add inotives/trinary-agents --skill trinary-rapid --agent codex
 
 # Claude Code (installs to .claude/skills/trinary-rapid/)
 npx skills add inotives/trinary-agents --skill trinary-rapid --agent claude-code
+```
+
+To install Trinary Tweak, use the same commands with `--skill trinary-tweak`:
+
+```sh
+# Codex
+npx skills add inotives/trinary-agents --skill trinary-tweak --agent codex
+
+# Claude Code (installs to .claude/skills/trinary-tweak/)
+npx skills add inotives/trinary-agents --skill trinary-tweak --agent claude-code
 ```
 
 For the Claude app (not Claude Code), download the skill ZIP from GitHub
@@ -238,6 +249,32 @@ plan and report are. See
 the skill's [`SKILL.md`](skills/trinary-rapid/SKILL.md) and
 [report reference](skills/trinary-rapid/references/report.md).
 
+## Trinary Tweak
+
+Trinary Tweak is for interactive sessions of small, ad hoc changes, such as
+UI polish, where the right result is found by looking at it: the human asks,
+the agent makes the change, the human checks it and gives feedback, and the
+loop repeats until the human moves on. There is no interview, plan approval,
+or per-change review. Each kept change gets a checkpoint commit (never on the
+default branch) so any approved state can be restored, and a dropped change
+is undone without touching the human's own edits. A scope guard recommends
+Trinary Rapid or Trinary Agents when a request touches the data model, APIs,
+backend logic, security, or several modules; the human decides.
+
+Each session is one record in the shared workspace:
+
+```text
+trinary-workspace/tweak/TW-XXXX--<slug>/
+└── README.md     # focus, one entry per kept or dropped change, checks, handoff
+```
+
+At wrap-up the agent runs the project's checks, separates failures the
+session caused from pre-existing ones, and writes the handoff. Sessions move
+from `Active` to `Closed` and are recorded as `review: human-iterated`; an
+independent review runs only when the human asks for one. A session can start
+from a backlog item and promote it. See the skill's
+[`SKILL.md`](skills/trinary-tweak/SKILL.md).
+
 ## Optional Supporting Skills and Tools
 
 The core workflow works with ordinary Markdown and the repository tools already
@@ -271,7 +308,8 @@ root. Backlog items capture ideas, bugs, and review follow-ups, hold the discuss
 that shapes them, and are promoted into a new feature plan when the human
 chooses one. Trinary Rapid keeps its features in `trinary-workspace/rapid/`,
 one folder per feature holding the plan, `report.md`, and `report.html`, and
-shares the same backlog. Each skill's `SKILL.md` defines its structure and
+Trinary Tweak keeps one session record per folder in `trinary-workspace/tweak/`;
+both share the same backlog. Each skill's `SKILL.md` defines its structure and
 rules. Workspace records are project data and are not included in this
 repository; the directory is ignored by this repo's `.gitignore`.
 

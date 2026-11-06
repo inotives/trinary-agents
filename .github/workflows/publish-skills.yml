@@ -57,6 +57,7 @@ jobs:
         skill:
           - trinary-agents
           - trinary-rapid
+          - trinary-tweak
           - trinary-workspace-backup
     steps:
       - name: Check out main

@@ -20,6 +20,10 @@ The skills are:
   tests are in `skills/trinary-rapid/scripts/` and
   `skills/trinary-rapid/tests/`; the report theme and pinned stylesheet are in
   `skills/trinary-rapid/assets/report/`.
+- [`skills/trinary-tweak/SKILL.md`](skills/trinary-tweak/SKILL.md): an
+  interactive companion for small, ad hoc changes such as UI polish: the human
+  iterates with the agent change by change, with no plan or per-change review,
+  and the session ends with a record and handoff. It has no scripts or tests.
 - [`skills/trinary-workspace-backup/SKILL.md`](skills/trinary-workspace-backup/SKILL.md):
   backs up and restores `trinary-workspace/` through a connected Google Drive
   integration.

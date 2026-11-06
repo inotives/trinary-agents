@@ -7,7 +7,12 @@ import sys
 from pathlib import Path
 
 
-SKILLS = ("trinary-agents", "trinary-rapid", "trinary-workspace-backup")
+SKILLS = (
+    "trinary-agents",
+    "trinary-rapid",
+    "trinary-tweak",
+    "trinary-workspace-backup",
+)
 VERSION_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
 
 
