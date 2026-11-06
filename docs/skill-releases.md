@@ -1,7 +1,7 @@
 # Skill releases
 
-This repository publishes `trinary-agents`, `trinary-rapid`, and
-`trinary-workspace-backup` as separate GitHub Releases. Each release includes
+This repository publishes `trinary-agents`, `trinary-rapid`,
+`trinary-tweak`, and `trinary-workspace-backup` as separate GitHub Releases. Each release includes
 a ZIP containing the skill's folder at the archive root, ready to upload to
 Claude's Skills settings.
 
