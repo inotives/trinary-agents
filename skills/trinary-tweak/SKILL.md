@@ -14,6 +14,7 @@ Run an interactive session of small changes where the human checks every iterati
 - Keep the loop fast. Do not write to the record on every iteration; write once per kept or dropped change, and at wrap-up.
 - Preserve existing files and work. Never overwrite an existing tweak session or backlog item, and never revert or commit edits that do not belong to the session.
 - Never make commits on the repository's default branch during a session.
+- A branch has at most one `Active` session. Continue it rather than starting another; a new session on the same branch starts only after the open one is wrapped up.
 - When committing, stage only the files and hunks that belong to the checkpoint. Leave out OS metadata such as `.DS_Store`. Follow the repository's commit message convention; if none exists, use a short imperative subject that names the session ID, such as `TW-0001: tighten card spacing`.
 - If `trinary-workspace/` is ignored by Git, commit none of its files; commit only implementation files, unless the human explicitly asks to commit specific workspace files.
 - The human checking each iteration is not an independent review, and neither are the agent's own checks. Never describe a tweak session as independently reviewed unless a reviewer that did not make the changes reviewed them at wrap-up.
@@ -39,6 +40,16 @@ Each session lives in `trinary-workspace/tweak/TW-XXXX--<session-slug>/README.md
 
 ### 1. Start the session
 
+Before creating anything, including a branch, look for an open session: inspect `trinary-workspace/tweak/TW-*/README.md` for `status: Active` and note each one's `branch`. Check these cases in order and act on the first that applies. Sessions on other branches are mentioned only when no session is `Active` on the current branch. Only records present in the working tree are found; in a project that commits `trinary-workspace/` to Git, a session that exists only on another branch is not detected.
+
+- **The human explicitly asks for a new session:** if a session is `Active` on the current branch, follow [Starting a new session while one is open](#starting-a-new-session-while-one-is-open); otherwise start a new session with the steps below.
+- **Exactly one `Active` session on the current branch:** resume it automatically through [Resuming a session](#resuming-a-session), without asking first. Open the reply with `Continuing tweak session TW-XXXX (<title>)`, the last kept change, and any in-progress edits, then handle the request as the session's next change. The human can reply "start a new session"; see [Starting a new session while one is open](#starting-a-new-session-while-one-is-open).
+- **`Active` sessions only on other branches:** name each session and its branch. If the worktree is clean, ask whether to switch to that branch and resume it, or start a new session here. If the worktree has uncommitted changes, do not offer the switch: say that switching would carry or block those changes, list them, leave moving them to the human, and offer a new session here. Never switch branches without the human's answer.
+- **Several `Active` sessions on the current branch** (possible with sessions from 1.0.0): list each ID, title, and last change, and ask which to resume. Uncommitted session edits belong to the chosen session. Offer to wrap up the others (step 4) with no change in progress, and note that in their Handoffs.
+- **No `Active` session:** start a new session with the steps below.
+
+To start a new session:
+
 1. Inspect the repository root, current branch, and worktree.
    - If the current branch is the default branch, or a branch that belongs to unrelated work, create a session branch following the repository's convention, or `tweak/<slug>` without one. Otherwise continue on the current branch.
    - If the worktree has uncommitted changes, do not stash, reset, or discard them. List those files under Decisions as pre-existing; they are excluded from Changes, checkpoints, and the handoff. If session edits must touch one of them, tell the human, and stage only the session's hunks when committing.
@@ -48,6 +59,15 @@ Each session lives in `trinary-workspace/tweak/TW-XXXX--<session-slug>/README.md
 5. Checkpoint commits are on by default. Turn them off only if the human asks, and record `checkpoints: off`.
 
 Do not hold an interview. Start on the first request immediately.
+
+#### Starting a new session while one is open
+
+When the human asks for a new session while one is `Active` on the current branch, close the open one first:
+
+1. If the open session has a change in progress, ask whether to keep it (close it as kept in that session, with its checkpoint) or drop it (revert it, as in step 3). It is never carried into the new session.
+2. Choose the next unused TW number for the new session.
+3. Wrap up the open session (step 4), or each of them if several are `Active` on the branch, naming the new session's ID in each Handoff.
+4. Create the new session with that ID (steps 1–5 above), and link the closed session in Focus.
 
 ### 2. Iterate
 
@@ -207,8 +227,8 @@ Rebuild state from the session README and the repository, not from earlier chat 
 
 1. Read the README's `status` and confirm the current branch matches `branch`. If it is `Closed`, start a new session for new requests.
 2. If it is `Active`, compare the last logged change with `git log` since `base_commit` and with `git status`, setting aside the pre-existing files listed in Decisions. With checkpoints on, uncommitted session edits after the last checkpoint belong to the change in progress. With checkpoints off, uncommitted edits also hold every kept change; match them against the files in the Changes entries, and treat the rest as the change in progress. A checkpoint commit with no matching entry under Changes is a kept change whose record update was interrupted; write its entry from the commit.
-3. Tell the human what you found — the last kept change and any in-progress edits — and continue iterating, or wrap up if they ask.
+3. Tell the human what you found, starting with `Continuing tweak session TW-XXXX (<title>)`, then the last kept change and any in-progress edits, and continue iterating, or wrap up if they ask.
 
 ## Status reference
 
-Tweak sessions have their own two statuses, separate from the plan statuses that trinary-agents and trinary-rapid share: `Active` (iterating) → `Closed` (wrap-up done and handoff written). There is no approval or acceptance status: the human approves each change as it happens, and the session record is the evidence. Likewise, `review: human-iterated` is tweak-only vocabulary for "checked by the human during the loop, not independently reviewed"; do not align either with rapid's values.
+Tweak sessions have their own two statuses, separate from the plan statuses that trinary-agents and trinary-rapid share: `Active` (iterating) → `Closed` (wrap-up done and handoff written). A branch has at most one `Active` session at a time. There is no approval or acceptance status: the human approves each change as it happens, and the session record is the evidence. Likewise, `review: human-iterated` is tweak-only vocabulary for "checked by the human during the loop, not independently reviewed"; do not align either with rapid's values.

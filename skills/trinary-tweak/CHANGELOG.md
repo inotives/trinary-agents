@@ -4,6 +4,23 @@ All notable changes to the `trinary-tweak` skill. Versions follow
 [Semantic Versioning](https://semver.org/); each release's section is used as
 its GitHub Release notes.
 
+## 1.0.1
+
+### Fixed
+
+- Starting a tweak no longer opens a second session while one is still
+  `Active` on the branch. The start step first looks for `Active` sessions:
+  it resumes the branch's single open session automatically and says so
+  (`Continuing tweak session TW-XXXX (<title>)`), asks before switching to a
+  session on another branch (and does not offer the switch when there are
+  uncommitted changes), and asks which to resume when a branch has several.
+- A branch now has at most one `Active` session. Asking for a new session
+  first keeps or drops the open session's change in progress, wraps that
+  session up with a Handoff naming the new session, then starts the new one.
+- Documented that only session records in the working tree are detected, so
+  in projects that commit `trinary-workspace/`, sessions that exist only on
+  another branch are not found.
+
 ## 1.0.0
 
 ### Added

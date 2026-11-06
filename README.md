@@ -271,7 +271,10 @@ trinary-workspace/tweak/TW-XXXX--<slug>/
 At wrap-up the agent runs the project's checks, separates failures the
 session caused from pre-existing ones, and writes the handoff. Sessions move
 from `Active` to `Closed` and are recorded as `review: human-iterated`; an
-independent review runs only when the human asks for one. A session can start
+independent review runs only when the human asks for one. Starting a tweak
+in a new conversation resumes the branch's open session and says which TW it
+is continuing; asking for a new session wraps up the open one first, so a
+branch has only one open session at a time. A session can start
 from a backlog item and promote it. See the skill's
 [`SKILL.md`](skills/trinary-tweak/SKILL.md).
 
